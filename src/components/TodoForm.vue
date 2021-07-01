@@ -6,7 +6,7 @@
         <v-text-field
           ref="todo"
           v-model="todo"
-          :rules="[() => !!todo || 'This field is required']"
+          :rules="[() => !!todo || 'This field is required', (value) => value.length <= 40 || 'Must less than 50 char']"
           label="Todo"
           required
         ></v-text-field>

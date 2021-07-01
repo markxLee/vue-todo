@@ -3,47 +3,49 @@
     <v-col sm="12" md="4">
       <todo-form />
     </v-col>
-    <v-col  sm="12"  md="4">
-      <todo-card
-        v-for="(todo, index) in todos"
-        :key="todo.id"
-        :todo="todo"
-        :class="index > 0 ? 'mt-5' : ''"
-      >
-        <template #actions="{todo: contextTodo, selected}">
-          <transition-group name="fade" mode="out-in">
-            <v-icon
-              :color="contextTodo.isPined ? 'yellow darken-2' : ''"
-              @click="
-                contextTodo.isPined
-                  ? unpin(contextTodo.originalIndex)
-                  : pinToTop(contextTodo.originalIndex)
-              "
-              key="pin"
-            >
-              mdi-alert-octagon
-            </v-icon>
-            <v-icon
-              color="red darken-2"
-              @click="remove(contextTodo.originalIndex)"
-              v-if="selected"
-              key="remove"
-            >
-              mdi-delete-circle
-            </v-icon>
-            <v-icon
-              color="green darken-2"
-              @click="changeStatus(contextTodo.originalIndex)"
-              v-if="selected"
-              key="done"
-            >
-              mdi-check-underline-circle
-            </v-icon>
-          </transition-group>
-        </template>
-      </todo-card>
+    <v-col sm="12" md="4">
+      <transition-group tag="div" name="list">
+        <todo-card
+          v-for="(todo, index) in todos"
+          :key="todo.id"
+          :todo="todo"
+          :class="index > 0 ? 'mt-5' : ''"
+        >
+          <template #actions="{ todo: contextTodo, selected }">
+            <transition-group name="fade" mode="out-in">
+              <v-icon
+                :color="contextTodo.isPined ? 'yellow darken-2' : ''"
+                @click="
+                  contextTodo.isPined
+                    ? unpin(contextTodo.originalIndex)
+                    : pinToTop(contextTodo.originalIndex)
+                "
+                key="pin"
+              >
+                mdi-alert-octagon
+              </v-icon>
+              <v-icon
+                color="red darken-2"
+                @click="remove(contextTodo.originalIndex)"
+                v-if="selected"
+                key="remove"
+              >
+                mdi-delete-circle
+              </v-icon>
+              <v-icon
+                color="green darken-2"
+                @click="changeStatus(contextTodo.originalIndex)"
+                v-if="selected"
+                key="done"
+              >
+                mdi-check-underline-circle
+              </v-icon>
+            </transition-group>
+          </template>
+        </todo-card>
+      </transition-group>
     </v-col>
-    <v-col  sm="12"  md="4">
+    <v-col sm="12" md="4">
       <todo-card
         v-for="(todo, index) in doneTodos"
         :key="index"
@@ -51,7 +53,7 @@
         :class="index > 0 ? 'mt-5' : ''"
         :disable="true"
       >
-        <template #content="{todo}">
+        <template #content="{ todo }">
           <span class="text-decoration-line-through">
             {{ todo.content }}
           </span>
@@ -69,7 +71,7 @@ export default {
   name: "Home",
   components: {
     TodoForm,
-    TodoCard
+    TodoCard,
   },
   data() {
     return {};
@@ -86,7 +88,7 @@ export default {
     },
     doneTodos() {
       return this.$store.getters.doneTodos;
-    }
+    },
   },
   methods: {
     getKey() {
@@ -105,8 +107,8 @@ export default {
     },
     unpin(index) {
       this.$store.dispatch("unpin", index);
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
@@ -119,5 +121,32 @@ export default {
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
   transform: translateX(10px);
   opacity: 0;
+}
+.list-enter-active,
+.list-leave-active,
+.list-move {
+  transition: 500ms cubic-bezier(0.59, 0.12, 0.34, 0.95);
+  transition-property: opacity, transform;
+}
+
+.list-enter {
+  opacity: 0;
+  transform: translateX(50px) scaleY(0.5);
+}
+
+.list-enter-to {
+  opacity: 1;
+  transform: translateX(0) scaleY(1);
+}
+
+.list-leave-active {
+  /* position: absolute; */
+  transform: translateX(0) scaleY(1);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: right left;
 }
 </style>
