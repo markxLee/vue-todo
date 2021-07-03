@@ -1,153 +1,77 @@
 <template>
-  <div id="app">
-    <h1 class="label">VueJs To Do</h1>
+  <v-app id="app">
+    <!-- App name -->
+    <div
+      class="
+        text-center
+        display-3
+        font-weight-medium
+        my-10
+        yellow--text
+        text--darken-3
+      "
+    >
+      VueJs To Do
+    </div>
 
-    <!-- Important tasks -->
-    <h3 v-show="importantTasks.length">
-      Important: {{ importantTasks.length }}
-    </h3>
-    <div class="todo-list" v-for="task in importantTasks" :key="task.id">
-      <div>
-        <input
-          class="todo-checkbox"
-          type="checkbox"
-          v-model="task.isCompleted"
-        />
-        <input
-          class="atodo-list-item"
-          type="text"
-          v-model="task.content"
-          v-if="task.isEditing"
-          v-focus
-          @keyup.enter="doneEdit(task)"
-          @keyup.esc="cancelEdit(task)"
-          @blur="cancelEdit(task)"
-        />
-        <span
-          class="atodo-list-item"
-          :class="{ done: task.isCompleted }"
-          v-else
-          @dblclick="editTask(task)"
-          >{{ task.content }}</span
+    <!-- App body -->
+    <v-card height="auto" width="600" class="pa-4" :elevation="6">
+      <!-- New task field -->
+      <v-text-field
+        label="What needs to be done"
+        solo
+        hide-details
+        v-model="newTask"
+        @keydown.enter="addNewTask()"
+      ></v-text-field>
+
+      <!-- Control button -->
+      <v-row align="center" justify="space-between" class="ma-0 mt-4">
+        <v-btn
+          class="text-none"
+          text
+          :disabled="isCompletedAll"
+          @click="completeAllTasks()"
         >
-        <input
-          class="todo-pin"
-          type="checkbox"
-          v-model="task.isPin"
-          @click="pinTask(task.id)"
-        />
-        <button class="todo-button--delete" @click="deleteTask(task.id)">
-          Delete
-        </button>
-      </div>
-    </div>
-
-    <!-- Current tasks -->
-    <h3 v-show="currentTasks.length">
-      Current task: {{ currentTasks.length }}
-    </h3>
-    <div class="todo-list" v-for="task in currentTasks" :key="task.id">
-      <div>
-        <input
-          class="todo-checkbox"
-          type="checkbox"
-          v-model="task.isCompleted"
-        />
-        <input
-          class="atodo-list-item"
-          type="text"
-          v-model="task.content"
-          v-if="task.isEditing"
-          v-focus
-          @keyup.enter="doneEdit(task)"
-          @keyup.esc="cancelEdit(task)"
-          @blur="cancelEdit(task)"
-        />
-        <span
-          class="atodo-list-item"
-          :class="{ done: task.isCompleted }"
-          v-else
-          @dblclick="editTask(task)"
-          >{{ task.content }}</span
+          Complete all
+        </v-btn>
+        <v-btn
+          class="text-none"
+          text
+          :disabled="isEmptyTask"
+          @click="clearCompletedTasks()"
         >
-        <input
-          class="todo-pin"
-          type="checkbox"
-          v-model="task.isPin"
-          @click="pinTask(task.id)"
-        />
-        <button class="todo-button--delete" @click="deleteTask(task.id)">
-          Delete
-        </button>
-      </div>
-    </div>
+          Clear completed
+        </v-btn>
+      </v-row>
 
-    <!-- Completed tasks -->
-    <h3 v-show="completedTasks.length">
-      Completed: {{ completedTasks.length }}
-    </h3>
-    <div class="todo-list" v-for="task in completedTasks" :key="task.id">
-      <div>
-        <!-- <input
-          class="todo-checkbox"
-          type="checkbox"
-          v-model="task.isCompleted"
-        /> -->
-        <input
-          class="atodo-list-item"
-          type="text"
-          v-model="task.content"
-          v-if="task.isEditing"
-          v-focus
-          @keyup.enter="doneEdit(task)"
-          @keyup.esc="cancelEdit(task)"
-          @blur="cancelEdit(task)"
-        />
-        <span
-          class="atodo-list-item"
-          :class="{ done: task.isCompleted }"
-          v-else
-          @dblclick="editTask(task)"
-          >{{ task.content }}</span
-        >
-        <input
-          class="todo-pin"
-          type="checkbox"
-          v-model="task.isPin"
-          @click="pinTask(task.id)"
-        />
-        <button class="todo-button--delete" @click="deleteTask(task.id)">
-          Delete
-        </button>
-      </div>
-    </div>
-
-    <!-- New task field -->
-    <input
-      class="todo-input"
-      type="text"
-      placeholder="What needs to be done"
-      v-model="newTask"
-    />
-    <button class="todo-button--add" @click="addNewTask()">Add a task</button>
-
-    <!-- Control checkbox -->
-    <div>
-      <button class="todo-control-button" @click="completeAllTasks()">
-        Complete all
-      </button>
-      <button class="todo-control-button" @click="clearCompletedTasks()">
-        Clear completed
-      </button>
-    </div>
-  </div>
+      <!-- Group todo list -->
+      <TodoGroup
+        v-for="(taskGroup, index) in taskGroups"
+        :key="index"
+        :groupHeader="taskGroup.groupHeader"
+        :taskList="taskGroup.taskList"
+        :completeTask="completeTask"
+        :pinTask="pinTask"
+        :deleteTask="deleteTask"
+        :editTask="editTask"
+        :completeEdit="completeEdit"
+        :cancelEdit="cancelEdit"
+      />
+    </v-card>
+  </v-app>
 </template>
 
 <script>
+import TodoGroup from './components/TodoGroup.vue'
+
 export default {
+  components: {
+    TodoGroup,
+  },
   data() {
     return {
-      beforeEditeCache: '',
+      beforeEditCache: '',
       newTask: '',
       todoId: 10,
       tasks: [
@@ -225,21 +149,36 @@ export default {
     }
   },
   computed: {
-    currentTasks: function () {
-      return this.tasks.filter((task) => !task.isCompleted && !task.isPin)
+    taskGroups: function () {
+      const importantTasks = this.tasks.filter(
+        (task) => !task.isCompleted && task.isPin,
+      )
+      const currentTasks = this.tasks.filter(
+        (task) => !task.isCompleted && !task.isPin,
+      )
+      const completedTasks = this.tasks.filter((task) => task.isCompleted)
+      const taskGroups = [
+        {
+          groupHeader: 'Important task',
+          taskList: importantTasks,
+        },
+        {
+          groupHeader: 'Current task',
+          taskList: currentTasks,
+        },
+        {
+          groupHeader: 'Completed task',
+          taskList: completedTasks,
+        },
+      ]
+
+      return taskGroups
     },
-    importantTasks: function () {
-      return this.tasks.filter((task) => !task.isCompleted && task.isPin)
+    isCompletedAll: function () {
+      return this.tasks.every((task) => task.isCompleted)
     },
-    completedTasks: function () {
-      return this.tasks.filter((task) => task.isCompleted)
-    },
-  },
-  directives: {
-    focus: {
-      inserted: function (el) {
-        el.focus()
-      },
+    isEmptyTask: function () {
+      return this.tasks.length === 0
     },
   },
   methods: {
@@ -256,27 +195,35 @@ export default {
         this.todoId += 1
       }
     },
-    deleteTask: function (id) {
-      const todoIndex = this.tasks.findIndex((task) => task.id === id)
-      this.tasks.splice(todoIndex, 1)
+    completeTask: function (id) {
+      const taskId = this.tasks.findIndex((task) => task.id === id)
+      this.tasks[taskId].isCompleted = !this.tasks[taskId].isCompleted
     },
     pinTask: function (id) {
-      const todoIndex = this.tasks.findIndex((task) => task.id === id)
-      this.tasks[todoIndex].isPin = !this.tasks[todoIndex].isPin
+      const taskId = this.tasks.findIndex((task) => task.id === id)
+      this.tasks[taskId].isPin = !this.tasks[taskId].isPin
     },
-    editTask: function (task) {
-      this.beforeEditeCache = task.content
-      task.isEditing = true
+    deleteTask: function (id) {
+      const taskId = this.tasks.findIndex((task) => task.id === id)
+      this.tasks.splice(taskId, 1)
     },
-    doneEdit: function (task) {
-      if (task.content.trim() === '') {
-        task.content = this.beforeEditCache
+
+    editTask: function (id) {
+      const taskId = this.tasks.findIndex((task) => task.id === id)
+      this.beforeEditCache = this.tasks[taskId].content
+      this.tasks[taskId].isEditing = true
+    },
+    completeEdit: function (id) {
+      const taskId = this.tasks.findIndex((task) => task.id === id)
+      if (this.tasks[taskId].content.trim() === '') {
+        this.tasks[taskId].content = this.beforeEditCache
       }
-      task.isEditing = false
+      this.tasks[taskId].isEditing = false
     },
-    cancelEdit: function (task) {
-      this.content = task.beforeEditCache
-      task.isEditing = false
+    cancelEdit: function (id) {
+      const taskId = this.tasks.findIndex((task) => task.id === id)
+      this.tasks[taskId].content = this.beforeEditCache
+      this.tasks[taskId].isEditing = false
     },
     completeAllTasks: function () {
       this.tasks.forEach((task) => (task.isCompleted = true))
@@ -291,9 +238,9 @@ export default {
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
-  text-align: center;
-}
-.done {
-  text-decoration: line-through;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 </style>
