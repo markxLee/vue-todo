@@ -1,201 +1,28 @@
 <template>
   <v-app id="app">
-    <!-- App name -->
-    <div
-      class="
-        text-center
-        display-3
-        font-weight-medium
-        my-10
-        yellow--text
-        text--darken-3
-      "
-    >
-      VueJs To Do
-    </div>
+    <v-app-bar app>
+      <router-link to="/">
+        <v-img src="./assets/logo.png" max-width="40" max-height="40"></v-img>
+      </router-link>
 
-    <!-- App body -->
-    <v-card height="auto" width="600" class="pa-4" :elevation="6">
-      <!-- New task field -->
-      <v-text-field
-        label="What needs to be done"
-        solo
-        hide-details
-        v-model="newTask"
-        @keydown.enter="addNewTask()"
-      ></v-text-field>
-
-      <!-- Control button -->
-      <v-row align="center" justify="space-between" class="ma-0 mt-4">
-        <v-btn
-          class="text-none"
-          text
-          :disabled="isDisabledCompleteAllButton"
-          @click="completeAllTasks()"
-        >
-          Complete all
-        </v-btn>
-        <v-btn
-          class="text-none"
-          text
-          :disabled="isDisabledClearCompletedButton"
-          @click="clearCompletedTasks()"
-        >
-          Clear completed
-        </v-btn>
+      <v-row justify="end" class="ma-0 ml-1">
+        <router-link to="/" class="nav-link">Home</router-link>
+        <router-link to="/Todo" class="nav-link">Todo</router-link>
+        <router-link to="/Note" class="nav-link">Note</router-link>
       </v-row>
+    </v-app-bar>
 
-      <!-- Group todo list -->
-      <TodoGroup
-        v-for="(taskGroup, index) in taskGroups"
-        :key="index"
-        :groupHeader="taskGroup.groupHeader"
-        :taskList="taskGroup.taskList"
-        :completeTask="completeTask"
-        :pinTask="pinTask"
-        :deleteTask="deleteTask"
-        :editTask="editTask"
-        :completeEdit="completeEdit"
-        :cancelEdit="cancelEdit"
-      />
-    </v-card>
+    <v-main>
+      <router-view />
+    </v-main>
+
+    <v-footer app>
+      <v-row justify="center" no-gutters>
+        <div height="40">@ Nguyen Hoang Tuan</div>
+      </v-row>
+    </v-footer>
   </v-app>
 </template>
-
-<script>
-import TodoGroup from './components/TodoGroup.vue'
-
-export default {
-  components: {
-    TodoGroup,
-  },
-  data() {
-    return {
-      beforeEditCache: '',
-      newTask: '',
-      taskIdCount: 0,
-      tasks: [],
-    }
-  },
-  beforeMount() {
-    this.loadDataFromLocalStorage()
-  },
-  computed: {
-    taskGroups: function () {
-      const importantTasks = this.tasks.filter(
-        (task) => !task.isCompleted && task.isPin,
-      )
-      const currentTasks = this.tasks.filter(
-        (task) => !task.isCompleted && !task.isPin,
-      )
-      const completedTasks = this.tasks.filter((task) => task.isCompleted)
-      const taskGroups = [
-        {
-          groupHeader: 'Important task',
-          taskList: importantTasks,
-        },
-        {
-          groupHeader: 'Current task',
-          taskList: currentTasks,
-        },
-        {
-          groupHeader: 'Completed task',
-          taskList: completedTasks,
-        },
-      ]
-
-      return taskGroups
-    },
-    isDisabledCompleteAllButton: function () {
-      return this.tasks.every((task) => task.isCompleted)
-    },
-    isDisabledClearCompletedButton: function () {
-      return this.tasks.every((task) => !task.isCompleted)
-    },
-  },
-  methods: {
-    addNewTask: function () {
-      const newTaskValidated = this.newTask.trim()
-      if (newTaskValidated) {
-        this.tasks.push({
-          id: this.taskIdCount,
-          content: newTaskValidated,
-          isCompleted: false,
-          isPin: false,
-          isEditing: false,
-        })
-        this.taskIdCount += 1
-        this.saveDataToLocalStorage()
-      }
-      this.newTask = ''
-    },
-    completeTask: function (id) {
-      const taskId = this.tasks.findIndex((task) => task.id === id)
-      this.tasks[taskId].isCompleted = !this.tasks[taskId].isCompleted
-      this.saveDataToLocalStorage()
-    },
-    pinTask: function (id) {
-      const taskId = this.tasks.findIndex((task) => task.id === id)
-      this.tasks[taskId].isPin = !this.tasks[taskId].isPin
-      this.saveDataToLocalStorage()
-    },
-    deleteTask: function (id) {
-      const taskId = this.tasks.findIndex((task) => task.id === id)
-      this.tasks.splice(taskId, 1)
-      this.saveDataToLocalStorage()
-    },
-
-    editTask: function (id) {
-      const taskId = this.tasks.findIndex((task) => task.id === id)
-      this.beforeEditCache = this.tasks[taskId].content
-      this.tasks[taskId].isEditing = true
-    },
-    completeEdit: function (id) {
-      const taskId = this.tasks.findIndex((task) => task.id === id)
-      if (this.tasks[taskId].content.trim() === '') {
-        this.tasks[taskId].content = this.beforeEditCache
-      }
-      this.tasks[taskId].isEditing = false
-      this.saveDataToLocalStorage()
-    },
-    cancelEdit: function (id) {
-      const taskId = this.tasks.findIndex((task) => task.id === id)
-      this.tasks[taskId].content = this.beforeEditCache
-      this.tasks[taskId].isEditing = false
-    },
-    completeAllTasks: function () {
-      this.tasks.forEach((task) => (task.isCompleted = true))
-      this.saveDataToLocalStorage()
-    },
-    clearCompletedTasks: function () {
-      this.tasks = this.tasks.filter((task) => !task.isCompleted)
-      this.saveDataToLocalStorage()
-    },
-    loadDataFromLocalStorage: function () {
-      const taskIdCount = localStorage.getItem('taskIdCount')
-      const tasks = localStorage.getItem('tasks')
-      console.log(tasks)
-
-      if (taskIdCount && tasks) {
-        try {
-          this.taskIdCount = JSON.parse(taskIdCount)
-          this.tasks = JSON.parse(tasks)
-        } catch (e) {
-          localStorage.removeItem('taskIdCount')
-          localStorage.removeItem('tasks')
-          console.log(e)
-        }
-      }
-    },
-    saveDataToLocalStorage: function () {
-      const parsedTaskIdCount = JSON.stringify(this.taskIdCount)
-      const parsedTasks = JSON.stringify(this.tasks)
-      localStorage.setItem('taskIdCount', parsedTaskIdCount)
-      localStorage.setItem('tasks', parsedTasks)
-    },
-  },
-}
-</script>
 
 <style>
 #app {
@@ -204,5 +31,13 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+.nav-link {
+  text-decoration: none;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: rgb(95, 95, 95) !important;
+  padding: 0 10px;
+  margin: 0 10px;
 }
 </style>
