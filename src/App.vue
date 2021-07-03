@@ -30,7 +30,7 @@
         <v-btn
           class="text-none"
           text
-          :disabled="isCompletedAll"
+          :disabled="isDisabledCompleteAllButton"
           @click="completeAllTasks()"
         >
           Complete all
@@ -38,7 +38,7 @@
         <v-btn
           class="text-none"
           text
-          :disabled="isEmptyTask"
+          :disabled="isDisabledClearCompletedButton"
           @click="clearCompletedTasks()"
         >
           Clear completed
@@ -73,80 +73,12 @@ export default {
     return {
       beforeEditCache: '',
       newTask: '',
-      todoId: 10,
-      tasks: [
-        {
-          id: 0,
-          content: 'Di cho mua rau 0',
-          isCompleted: false,
-          isPin: true,
-          isEditing: false,
-        },
-        {
-          id: 1,
-          content: 'Di cho mua rau 1',
-          isCompleted: false,
-          isPin: false,
-          isEditing: false,
-        },
-        {
-          id: 2,
-          content: 'Di cho mua rau 2',
-          isCompleted: false,
-          isPin: false,
-          isEditing: false,
-        },
-        {
-          id: 3,
-          content: 'Di cho mua rau 3',
-          isCompleted: true,
-          isPin: false,
-          isEditing: false,
-        },
-        {
-          id: 4,
-          content: 'Di cho mua rau 4',
-          isCompleted: true,
-          isPin: false,
-          isEditing: false,
-        },
-        {
-          id: 5,
-          content: 'Di cho mua rau 5',
-          isCompleted: true,
-          isPin: true,
-          isEditing: false,
-        },
-        {
-          id: 6,
-          content: 'Di cho mua rau 6',
-          isCompleted: false,
-          isPin: false,
-          isEditing: false,
-        },
-        {
-          id: 7,
-          content: 'Di cho mua rau 7',
-          isCompleted: false,
-          isPin: false,
-          isEditing: false,
-        },
-        {
-          id: 8,
-          content: 'Di cho mua rau 8',
-          isCompleted: true,
-          isPin: false,
-          isEditing: false,
-        },
-        {
-          id: 9,
-          content: 'Di cho mua rau 9',
-          isCompleted: true,
-          isPin: false,
-          isEditing: false,
-        },
-      ],
+      taskIdCount: 0,
+      tasks: [],
     }
+  },
+  beforeMount() {
+    this.loadDataFromLocalStorage()
   },
   computed: {
     taskGroups: function () {
@@ -174,38 +106,43 @@ export default {
 
       return taskGroups
     },
-    isCompletedAll: function () {
+    isDisabledCompleteAllButton: function () {
       return this.tasks.every((task) => task.isCompleted)
     },
-    isEmptyTask: function () {
-      return this.tasks.length === 0
+    isDisabledClearCompletedButton: function () {
+      return this.tasks.every((task) => !task.isCompleted)
     },
   },
   methods: {
     addNewTask: function () {
-      if (this.newTask) {
+      const newTaskValidated = this.newTask.trim()
+      if (newTaskValidated) {
         this.tasks.push({
-          id: this.todoId,
-          content: this.newTask,
+          id: this.taskIdCount,
+          content: newTaskValidated,
           isCompleted: false,
           isPin: false,
           isEditing: false,
         })
-        this.newTask = ''
-        this.todoId += 1
+        this.taskIdCount += 1
+        this.saveDataToLocalStorage()
       }
+      this.newTask = ''
     },
     completeTask: function (id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       this.tasks[taskId].isCompleted = !this.tasks[taskId].isCompleted
+      this.saveDataToLocalStorage()
     },
     pinTask: function (id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       this.tasks[taskId].isPin = !this.tasks[taskId].isPin
+      this.saveDataToLocalStorage()
     },
     deleteTask: function (id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       this.tasks.splice(taskId, 1)
+      this.saveDataToLocalStorage()
     },
 
     editTask: function (id) {
@@ -219,6 +156,7 @@ export default {
         this.tasks[taskId].content = this.beforeEditCache
       }
       this.tasks[taskId].isEditing = false
+      this.saveDataToLocalStorage()
     },
     cancelEdit: function (id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
@@ -227,9 +165,33 @@ export default {
     },
     completeAllTasks: function () {
       this.tasks.forEach((task) => (task.isCompleted = true))
+      this.saveDataToLocalStorage()
     },
     clearCompletedTasks: function () {
       this.tasks = this.tasks.filter((task) => !task.isCompleted)
+      this.saveDataToLocalStorage()
+    },
+    loadDataFromLocalStorage: function () {
+      const taskIdCount = localStorage.getItem('taskIdCount')
+      const tasks = localStorage.getItem('tasks')
+      console.log(tasks)
+
+      if (taskIdCount && tasks) {
+        try {
+          this.taskIdCount = JSON.parse(taskIdCount)
+          this.tasks = JSON.parse(tasks)
+        } catch (e) {
+          localStorage.removeItem('taskIdCount')
+          localStorage.removeItem('tasks')
+          console.log(e)
+        }
+      }
+    },
+    saveDataToLocalStorage: function () {
+      const parsedTaskIdCount = JSON.stringify(this.taskIdCount)
+      const parsedTasks = JSON.stringify(this.tasks)
+      localStorage.setItem('taskIdCount', parsedTaskIdCount)
+      localStorage.setItem('tasks', parsedTasks)
     },
   },
 }
