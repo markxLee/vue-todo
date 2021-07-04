@@ -6,7 +6,7 @@
         mdi-chevron-down
       </v-icon>
       <v-icon v-else color="yellow darken-3"> mdi-chevron-right </v-icon>
-      <h3>{{ groupHeader }} {{ taskList.length }}</h3>
+      <h3>{{ groupHeader }}: {{ taskList.length }}</h3>
     </v-btn>
 
     <!-- Todo list -->

@@ -18,7 +18,7 @@
     <v-card height="auto" width="600" class="pa-4" :elevation="6">
       <!-- New task field -->
       <v-text-field
-        label="What needs to be done"
+        placeholder="What needs to be done"
         solo
         hide-details
         v-model="newTask"
@@ -93,15 +93,15 @@ export default {
       const completedTasks = this.tasks.filter((task) => task.isCompleted)
       const taskGroups = [
         {
-          groupHeader: 'Important task',
+          groupHeader: 'Important tasks',
           taskList: importantTasks,
         },
         {
-          groupHeader: 'Current task',
+          groupHeader: 'Current tasks',
           taskList: currentTasks,
         },
         {
-          groupHeader: 'Completed task',
+          groupHeader: 'Completed tasks',
           taskList: completedTasks,
         },
       ]
@@ -176,12 +176,20 @@ export default {
     loadDataFromLocalStorage: function () {
       const taskIdCount = localStorage.getItem('taskIdCount')
       const tasks = localStorage.getItem('tasks')
-      console.log(tasks)
 
       if (taskIdCount && tasks) {
         try {
-          this.taskIdCount = JSON.parse(taskIdCount)
           this.tasks = JSON.parse(tasks)
+          if (this.tasks.length === 0) {
+            this.taskIdCount = 0
+            localStorage.setItem(
+              'taskIdCount',
+              JSON.stringify(this.taskIdCount),
+            )
+          }
+          if (this.tasks.length) {
+            this.taskIdCount = JSON.parse(taskIdCount)
+          }
         } catch (e) {
           localStorage.removeItem('taskIdCount')
           localStorage.removeItem('tasks')

@@ -6,21 +6,19 @@
       </router-link>
 
       <v-row justify="end" class="ma-0 ml-1">
-        <router-link to="/" class="nav-link">Home</router-link>
-        <router-link to="/Todo" class="nav-link">Todo</router-link>
         <router-link to="/Note" class="nav-link">Note</router-link>
+        <router-link to="/Todo" class="nav-link">Todo</router-link>
+        <router-link to="/" class="nav-link">Home</router-link>
       </v-row>
     </v-app-bar>
 
     <v-main>
-      <router-view />
+      <v-container fluid>
+        <router-view />
+      </v-container>
     </v-main>
 
-    <v-footer app>
-      <v-row justify="center" no-gutters>
-        <div height="40">@ Nguyen Hoang Tuan</div>
-      </v-row>
-    </v-footer>
+    <v-footer app> @ Nguyen Hoang Tuan </v-footer>
   </v-app>
 </template>
 
