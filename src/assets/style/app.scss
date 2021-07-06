@@ -1,0 +1,32 @@
+.app-bar,.app-router-bar {
+  background-color: #B2DFDB!important;
+}
+.input {
+  width: 100%;
+}
+.list-title {
+  font-family: cursive;
+  font-size: xx-large;
+  color: teal;
+  font-weight: 500;
+}
+.v-card--reveal {
+  bottom: 0;
+  opacity: 1 !important;
+  width: 100%;
+}
+.todo {
+  display: flex;
+  justify-content: space-between;
+  &__title--done{
+      text-decoration: line-through;
+      color: teal;
+  }
+}
+.pin-task {
+text-decoration: underline;
+color: red;
+}
+.pin-task {
+color: red;
+}
