@@ -12,9 +12,9 @@
     <!-- Todo list -->
     <div v-if="isExpandTaskList">
       <v-list-item
-        class="elevation-2 mt-1 rounded todo-item"
         v-for="task in taskList"
         :key="task.id"
+        class="elevation-2 mt-1 rounded todo-item"
       >
         <!-- Complete todo -->
         <v-list-item-action class="mx-0">
@@ -44,9 +44,9 @@
           />
           <v-list-item-title
             v-else
-            v-text="task.content"
             :class="{ done: task.isCompleted }"
             @dblclick="editTask(task.id)"
+            v-text="task.content"
           ></v-list-item-title>
         </v-list-item-content>
 
@@ -74,28 +74,54 @@
 <script>
 export default {
   name: 'TodoGroup',
-  props: [
-    'groupHeader',
-    'taskList',
-    'completeTask',
-    'pinTask',
-    'deleteTask',
-    'editTask',
-    'completeEdit',
-    'cancelEdit',
-  ],
-  data: () => ({
-    isExpandTaskList: true,
-  }),
   directives: {
     focus: {
-      inserted: function (el) {
+      inserted(el) {
         el.focus()
       },
     },
   },
+  props: {
+    groupHeader: {
+      type: String,
+      default: '',
+    },
+    taskList: {
+      type: Array,
+      default() {
+        return []
+      },
+    },
+    completeTask: {
+      type: Function,
+      default: undefined,
+    },
+    pinTask: {
+      type: Function,
+      default: undefined,
+    },
+    deleteTask: {
+      type: Function,
+      default: undefined,
+    },
+    editTask: {
+      type: Function,
+      default: undefined,
+    },
+    completeEdit: {
+      type: Function,
+      default: undefined,
+    },
+    cancelEdit: {
+      type: Function,
+      default: undefined,
+    },
+  },
+  data: () => ({
+    isExpandTaskList: true,
+  }),
   methods: {
-    toggleExpandTaskList: function () {
+    toggleExpandTaskList() {
       this.isExpandTaskList = !this.isExpandTaskList
     },
   },

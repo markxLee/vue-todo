@@ -18,10 +18,10 @@
     <v-card height="auto" width="600" class="pa-4" :elevation="6">
       <!-- New task field -->
       <v-text-field
+        v-model="newTask"
         placeholder="What needs to be done"
         solo
         hide-details
-        v-model="newTask"
         @keydown.enter="addNewTask()"
       ></v-text-field>
 
@@ -49,14 +49,14 @@
       <TodoGroup
         v-for="(taskGroup, index) in taskGroups"
         :key="index"
-        :groupHeader="taskGroup.groupHeader"
-        :taskList="taskGroup.taskList"
-        :completeTask="completeTask"
-        :pinTask="pinTask"
-        :deleteTask="deleteTask"
-        :editTask="editTask"
-        :completeEdit="completeEdit"
-        :cancelEdit="cancelEdit"
+        :group-header="taskGroup.groupHeader"
+        :task-list="taskGroup.taskList"
+        :complete-task="completeTask"
+        :pin-task="pinTask"
+        :delete-task="deleteTask"
+        :edit-task="editTask"
+        :complete-edit="completeEdit"
+        :cancel-edit="cancelEdit"
       />
     </v-card>
   </div>
@@ -71,6 +71,7 @@ export default {
   components: {
     TodoGroup,
   },
+
   data() {
     return {
       beforeEditCache: '',
@@ -79,16 +80,16 @@ export default {
       tasks: [],
     }
   },
-  beforeMount() {
-    this.loadDataFromLocalStorage()
+  head: {
+    title: 'Todo',
   },
   computed: {
-    taskGroups: function () {
+    taskGroups() {
       const importantTasks = this.tasks.filter(
-        (task) => !task.isCompleted && task.isPin,
+        (task) => !task.isCompleted && task.isPin
       )
       const currentTasks = this.tasks.filter(
-        (task) => !task.isCompleted && !task.isPin,
+        (task) => !task.isCompleted && !task.isPin
       )
       const completedTasks = this.tasks.filter((task) => task.isCompleted)
       const taskGroups = [
@@ -108,15 +109,18 @@ export default {
 
       return taskGroups
     },
-    isDisabledCompleteAllButton: function () {
+    isDisabledCompleteAllButton() {
       return this.tasks.every((task) => task.isCompleted)
     },
-    isDisabledClearCompletedButton: function () {
+    isDisabledClearCompletedButton() {
       return this.tasks.every((task) => !task.isCompleted)
     },
   },
+  beforeMount() {
+    this.loadDataFromLocalStorage()
+  },
   methods: {
-    addNewTask: function () {
+    addNewTask() {
       const newTaskValidated = this.newTask.trim()
       if (newTaskValidated) {
         this.tasks.push({
@@ -131,28 +135,28 @@ export default {
       }
       this.newTask = ''
     },
-    completeTask: function (id) {
+    completeTask(id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       this.tasks[taskId].isCompleted = !this.tasks[taskId].isCompleted
       this.saveDataToLocalStorage()
     },
-    pinTask: function (id) {
+    pinTask(id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       this.tasks[taskId].isPin = !this.tasks[taskId].isPin
       this.saveDataToLocalStorage()
     },
-    deleteTask: function (id) {
+    deleteTask(id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       this.tasks.splice(taskId, 1)
       this.saveDataToLocalStorage()
     },
 
-    editTask: function (id) {
+    editTask(id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       this.beforeEditCache = this.tasks[taskId].content
       this.tasks[taskId].isEditing = true
     },
-    completeEdit: function (id) {
+    completeEdit(id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       if (this.tasks[taskId].content.trim() === '') {
         this.tasks[taskId].content = this.beforeEditCache
@@ -160,20 +164,20 @@ export default {
       this.tasks[taskId].isEditing = false
       this.saveDataToLocalStorage()
     },
-    cancelEdit: function (id) {
+    cancelEdit(id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       this.tasks[taskId].content = this.beforeEditCache
       this.tasks[taskId].isEditing = false
     },
-    completeAllTasks: function () {
+    completeAllTasks() {
       this.tasks.forEach((task) => (task.isCompleted = true))
       this.saveDataToLocalStorage()
     },
-    clearCompletedTasks: function () {
+    clearCompletedTasks() {
       this.tasks = this.tasks.filter((task) => !task.isCompleted)
       this.saveDataToLocalStorage()
     },
-    loadDataFromLocalStorage: function () {
+    loadDataFromLocalStorage() {
       const taskIdCount = localStorage.getItem('taskIdCount')
       const tasks = localStorage.getItem('tasks')
 
@@ -184,7 +188,7 @@ export default {
             this.taskIdCount = 0
             localStorage.setItem(
               'taskIdCount',
-              JSON.stringify(this.taskIdCount),
+              JSON.stringify(this.taskIdCount)
             )
           }
           if (this.tasks.length) {
@@ -193,11 +197,10 @@ export default {
         } catch (e) {
           localStorage.removeItem('taskIdCount')
           localStorage.removeItem('tasks')
-          console.log(e)
         }
       }
     },
-    saveDataToLocalStorage: function () {
+    saveDataToLocalStorage() {
       const parsedTaskIdCount = JSON.stringify(this.taskIdCount)
       const parsedTasks = JSON.stringify(this.tasks)
       localStorage.setItem('taskIdCount', parsedTaskIdCount)

@@ -18,13 +18,13 @@
     <v-card height="auto" width="600" class="pa-4" :elevation="6">
       <!-- New note field -->
       <v-textarea
+        v-model="newNote"
         placeholder="Take a note"
         solo
         auto-grow
         rows="1"
         row-height="15"
         hide-details=""
-        v-model="newNote"
       />
       <v-row
         v-if="isAddingNewNote"
@@ -56,13 +56,13 @@
       <NoteGroup
         v-for="(noteGroup, index) in noteGroups"
         :key="index"
-        :groupHeader="noteGroup.groupHeader"
-        :noteList="noteGroup.noteList"
-        :pinNote="pinNote"
-        :deleteNote="deleteNote"
-        :editNote="editNote"
-        :completeEdit="completeEdit"
-        :cancelEdit="cancelEdit"
+        :group-header="noteGroup.groupHeader"
+        :note-list="noteGroup.noteList"
+        :pin-note="pinNote"
+        :delete-note="deleteNote"
+        :edit-note="editNote"
+        :complete-edit="completeEdit"
+        :cancel-edit="cancelEdit"
       />
     </v-card>
 
@@ -86,6 +86,7 @@
           </v-btn>
         </v-row>
         <v-textarea
+          v-model="editCache"
           solo
           autofocus
           rows="10"
@@ -94,7 +95,6 @@
           hide-details
           dense
           background-color="transparent"
-          v-model="editCache"
         />
       </v-card>
     </v-dialog>
@@ -120,11 +120,11 @@ export default {
       notes: [],
     }
   },
-  beforeMount() {
-    this.loadDataFromLocalStorage()
+  head: {
+    title: 'Note',
   },
   computed: {
-    noteGroups: function () {
+    noteGroups() {
       const importantNotes = this.notes.filter((note) => note.isPin)
       const currentNotes = this.notes.filter((note) => !note.isPin)
       const noteGroups = [
@@ -140,12 +140,15 @@ export default {
 
       return noteGroups
     },
-    isAddingNewNote: function () {
+    isAddingNewNote() {
       return this.newNote.length > 0
     },
   },
+  beforeMount() {
+    this.loadDataFromLocalStorage()
+  },
   methods: {
-    completeAddNewNote: function () {
+    completeAddNewNote() {
       const newNoteValidated = this.newNote.trim()
       if (newNoteValidated) {
         this.notes.push({
@@ -159,26 +162,26 @@ export default {
       }
       this.newNote = ''
     },
-    cancelAddNewNote: function () {
+    cancelAddNewNote() {
       this.newNote = ''
     },
-    pinNote: function (id) {
+    pinNote(id) {
       const noteId = this.notes.findIndex((note) => note.id === id)
       this.notes[noteId].isPin = !this.notes[noteId].isPin
       this.saveDataToLocalStorage()
     },
-    deleteNote: function (id) {
+    deleteNote(id) {
       const noteId = this.notes.findIndex((note) => note.id === id)
       this.notes.splice(noteId, 1)
       this.saveDataToLocalStorage()
     },
-    editNote: function (id) {
+    editNote(id) {
       const noteId = this.notes.findIndex((note) => note.id === id)
       this.editCache = this.notes[noteId].content
       this.noteIdEdit = noteId
       this.isShowEditDialog = true
     },
-    completeEdit: function () {
+    completeEdit() {
       const noteId = this.noteIdEdit
       if (this.editCache.trim() !== '') {
         this.notes[noteId].content = this.editCache.trim()
@@ -187,11 +190,11 @@ export default {
       this.isShowEditDialog = false
       this.saveDataToLocalStorage()
     },
-    cancelEdit: function () {
+    cancelEdit() {
       this.noteIdEdit = null
       this.isShowEditDialog = false
     },
-    loadDataFromLocalStorage: function () {
+    loadDataFromLocalStorage() {
       const noteIdCount = localStorage.getItem('noteIdCount')
       const notes = localStorage.getItem('notes')
 
@@ -202,7 +205,7 @@ export default {
             this.noteIdCount = 0
             localStorage.setItem(
               'noteIdCount',
-              JSON.stringify(this.noteIdCount),
+              JSON.stringify(this.noteIdCount)
             )
           }
           if (this.notes.length) {
@@ -211,11 +214,10 @@ export default {
         } catch (e) {
           localStorage.removeItem('noteIdCount')
           localStorage.removeItem('notes')
-          console.log(e)
         }
       }
     },
-    saveDataToLocalStorage: function () {
+    saveDataToLocalStorage() {
       const parsedNoteIdCount = JSON.stringify(this.noteIdCount)
       const parsedNotes = JSON.stringify(this.notes)
       localStorage.setItem('noteIdCount', parsedNoteIdCount)

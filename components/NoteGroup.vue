@@ -12,9 +12,9 @@
     <!-- Note list -->
     <div v-if="isExpandNoteList">
       <div
-        class="elevation-2 my-1 rounded note-item"
         v-for="note in noteList"
         :key="note.id"
+        class="elevation-2 my-1 rounded note-item"
       >
         <!-- Note header -->
         <v-row
@@ -45,6 +45,7 @@
 
         <!-- Note content -->
         <v-textarea
+          v-model="note.content"
           solo
           readonly
           rows="1"
@@ -52,7 +53,6 @@
           auto-grow
           hide-details
           background-color="transparent"
-          v-model="note.content"
         />
       </div>
     </div>
@@ -62,27 +62,50 @@
 <script>
 export default {
   name: 'TodoGroup',
-  props: [
-    'groupHeader',
-    'noteList',
-    'pinNote',
-    'deleteNote',
-    'editNote',
-    'completeEdit',
-    'cancelEdit',
-  ],
-  data: () => ({
-    isExpandNoteList: true,
-  }),
   directives: {
     focus: {
-      inserted: function (el) {
+      inserted(el) {
         el.focus()
       },
     },
   },
+  props: {
+    groupHeader: {
+      type: String,
+      default: '',
+    },
+    noteList: {
+      type: Array,
+      default() {
+        return []
+      },
+    },
+    pinNote: {
+      type: Function,
+      default: undefined,
+    },
+    deleteNote: {
+      type: Function,
+      default: undefined,
+    },
+    editNote: {
+      type: Function,
+      default: undefined,
+    },
+    completeEdit: {
+      type: Function,
+      default: undefined,
+    },
+    cancelEdite: {
+      type: Function,
+      default: undefined,
+    },
+  },
+  data: () => ({
+    isExpandNoteList: true,
+  }),
   methods: {
-    toggleExpandNoteList: function () {
+    toggleExpandNoteList() {
       this.isExpandNoteList = !this.isExpandNoteList
     },
   },

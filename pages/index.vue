@@ -10,26 +10,20 @@
         my-10
       "
     >
-      Hello world
+      Hello world, I'm Vue
     </div>
     <div class="d-flex justify-center mt-16">
-      <router-link to="/todo" class="mx-10" style="text-decoration: none">
+      <nuxt-link to="/todo" class="mx-10" style="text-decoration: none">
         <v-card width="400" height="400">
-          <v-img src="../assets/todo.png"></v-img>
+          <v-img src="img/todo.png"></v-img>
         </v-card>
-      </router-link>
+      </nuxt-link>
 
-      <router-link to="/note" class="mx-10" style="text-decoration: none">
+      <nuxt-link to="/note" class="mx-10" style="text-decoration: none">
         <v-card width="400" height="400">
-          <v-img src="../assets/note.png"></v-img>
+          <v-img src="img/note.png"></v-img>
         </v-card>
-      </router-link>
+      </nuxt-link>
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: 'Home',
-}
-</script>
