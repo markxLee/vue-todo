@@ -1,10 +1,9 @@
 <template>
-  <v-app id="app">
     <v-container class="todo-container">
       <v-row class="mt-3">
-        <div class="col col-sm-1 justify-start">
+        <div class="col col-sm-2 justify-start">
           <v-menu offset-y bottom origin="center" transition="scale-transition">
-            <template v-slot:activator="{ attrs, on }">
+            <template #activator="{ attrs, on }">
               <v-btn
                 color="teal darken-1"
                 class="white--text mt-3 mb-3"
@@ -18,40 +17,40 @@
               <v-list-item
                 v-for="(item, index) in items"
                 :key="index + Math.random()"
-                v-on:click="handleSelect(item.title, item.id)"
+                @click="handleSelect(item.title, item.id)"
               >
                 <v-list-item-title>{{ item.title }}</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
         </div>
-        <div class="col col-sm-11 justify-end">
+        <div class="col col-sm-10 justify-end">
           <Input
-            @content="addTodoItem"
             class="mr-3"
             :disabled="idData !== 1 ? true : false"
+            @content="addTodoItem"
           />
         </div>
       </v-row>
-      <div class="list-title" v-show="titleList">My {{ titleList }}</div>
+      <div v-show="titleList" class="list-title">My {{ titleList }}</div>
       <v-list class="todo__list">
         <v-sheet outlined color="teal" rounded>
           <v-card class="mx-auto" outlined elevation="0">
             <Todo
               v-for="(todo, index) in listTodo"
-              :title="todo.content"
+              v-show="!reveal"
               :id="todo.id"
               :key="index + Math.random()"
+              :title="todo.content"
               :checked="todo.checked"
               :done="todo.done"
-              :pinTask="todo.pinTask"
-              :isEditable="todo.isEditable"
-              v-show="!reveal"
-              v-on:clicked-edit="handleEditor(todo)"
-              v-on:clicked-done="doneTodoItem(todo)"
-              v-on:clicked-checked="checkTodoItem(todo)"
-              v-on:clicked-delete="removeTodoItem(todo)"
-              v-on:clicked-pin="pinTodoItem(todo)"
+              :pin-task="todo.pinTask"
+              :is-editable="todo.isEditable"
+              @clicked-edit="handleEditor(todo)"
+              @clicked-done="doneTodoItem(todo)"
+              @clicked-checked="checkTodoItem(todo)"
+              @clicked-delete="removeTodoItem(todo)"
+              @clicked-pin="pinTodoItem(todo)"
             />
             <v-expand-transition>
               <v-card
@@ -60,12 +59,12 @@
               >
                 <DeletedList
                   v-for="(item, index) in listDeleted"
-                  :title="item.content"
                   :id="item.id"
                   :key="index + Math.random()"
+                  :title="item.content"
                   :checked="item.checked"
                   :done="item.done"
-                  v-on:clicked-restore="restoreItem(item)"
+                  @clicked-restore="restoreItem(item)"
                 />
               </v-card>
             </v-expand-transition>
@@ -73,14 +72,13 @@
         </v-sheet>
       </v-list>
     </v-container>
-  </v-app>
 </template>
 
 <script lang="ts">
-import DeletedList from '../components/DeletedList.vue'
 import Vue from 'vue'
-import Input from '../components/Input.vue'
-import Todo from '../components/Todo.vue'
+import DeletedList from '../../components/DeletedList.vue'
+import Input from '../../components/Input.vue'
+import Todo from '../../components/Todo.vue'
 
 export default Vue.extend({
   name: 'Home',
@@ -100,20 +98,20 @@ export default Vue.extend({
     idData: 1,
     reveal: false
   }),
-  mounted () {
-    if (localStorage.listTodo) {
-      this.listTodo = JSON.parse(localStorage.listTodo)
-    }
-    if (localStorage.listDeleted) {
-      this.listDeleted = JSON.parse(localStorage.listDeleted)
-    }
-  },
   watch: {
     listTodo (newListTodo) {
       localStorage.listTodo = JSON.stringify(newListTodo)
     },
     listDeleted (newListDeleted) {
       localStorage.listDeleted = JSON.stringify(newListDeleted)
+    }
+  },
+  mounted () {
+    if (localStorage.listTodo) {
+      this.listTodo = JSON.parse(localStorage.listTodo)
+    }
+    if (localStorage.listDeleted) {
+      this.listDeleted = JSON.parse(localStorage.listDeleted)
     }
   },
   methods: {

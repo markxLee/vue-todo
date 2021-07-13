@@ -1,4 +1,4 @@
-<template>
+b<template>
   <v-list-item class="todo">
     <v-checkbox
       v-model="checked"
