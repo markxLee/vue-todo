@@ -1,15 +1,15 @@
 <template>
   <v-text-field
+    v-model="content"
     class="input"
     placeholder="Please input your task's content"
     outlined
     color="teal"
     solo
-    v-model="content"
     append-icon="mdi-send"
+    :disabled="disabled === true"
     @keydown.enter="pushContent"
     @click:append="pushContent"
-    :disabled="disabled === true"
   >
   </v-text-field>
 </template>

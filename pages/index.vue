@@ -3,25 +3,18 @@
     <v-col cols="12" sm="8" md="6">
       <v-card class="logo py-4 d-flex justify-center">
         <v-img
-          alt="Binh.n Logo"
-          class="mr-2"
-          contain
-          src="./logo-b.png"
-          transition="scale-transition"
-          width="30"
-        />
-        <v-img
-          alt="Todo List"
+          alt="Home"
           class="mb-0"
           contain
           min-width="100"
-          src="./todo-list.png"
+          src="./home.png"
           width="200"
         />
+        <v-icon size="90px">mdi-home-heart</v-icon>
       </v-card>
       <v-card>
         <v-card-title class="headline justify-center">
-          Welcome to the Todo List of Binh.n
+          Todo List App
         </v-card-title>
         <v-card-actions class="justify-center">
           <v-btn

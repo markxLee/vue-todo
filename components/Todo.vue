@@ -1,92 +1,149 @@
 <template>
-  <v-list-item class="todo">
+  <v-list-item class="todo border">
     <v-checkbox
-      v-model="checked"
-      v-on:click="handleChecked"
+      v-model="isChecked"
       color="teal"
-      :disabled="done === true"
-      :value="this.checked"
+      :disabled="todo.done === true"
+      :value="todo.checked"
+      @click="handleChecked"
     ></v-checkbox>
-    <div
+    <v-col
       :class="{
-        'todo__title--done': this.done,
-        'pin-task': this.pinTask && !this.done,
-        'pin-done': this.pinTask && this.done
+        'todo__content--done': todo.done,
+        'pin-task': todo.pinTask && !todo.done,
+        'pin-done': todo.pinTask && todo.done
       }"
-      class="todo__title"
+      class="col-sm-5 todo__content"
     >
-      {{ title }}
-    </div>
-    <v-spacer />
-    <v-btn
-      class="todo__action mr-2 material-icons"
-      color="green"
-      icon
-      small
-      elevation="2"
-      plain
-      v-model="done"
-      v-on:click="handleDoneTask"
-      v-show="this.checked"
+      {{ editValue }}
+    </v-col>
+    <v-col
+      :class="{
+        'todo__content--done': todo.done,
+        'pin-task': todo.pinTask && !todo.done,
+        'pin-done': todo.pinTask && todo.done
+      }"
+      class="todo__content"
     >
-      <v-icon v-if="!done" dark>mdi-check-outline</v-icon>
-      <v-icon v-else dark>mdi-restore</v-icon>
-    </v-btn>
-    <v-btn
-      class="todo__action mr-2"
-      color="error"
-      icon
-      small
-      elevation="2"
-      plain
-      v-on:click="handleDeleteTask"
-      v-show="this.checked"
+      {{ dateFormat(created) }}
+    </v-col>
+    <v-col
+      :class="{
+        'todo__content--done': todo.done,
+        'pin-task': todo.pinTask && !todo.done,
+        'pin-done': todo.pinTask && todo.done
+      }"
+      class="todo__content"
     >
-      <v-icon>mdi-delete-outline</v-icon>
-    </v-btn>
-    <v-btn
-      class="todo__action mr-2 material-icons"
-      color="primary"
-      icon
-      small
-      elevation="2"
-      plain
-      v-on:click="handlePinTask"
-      v-show="this.checked"
-    >
-      <v-icon v-if="this.pinTask === false" dark>mdi-pin-outline</v-icon>
-      <v-icon v-else dark>mdi-pin-off-outline</v-icon>
-    </v-btn>
+      {{ dateFormat(updated) }}
+    </v-col>
+    <v-col>
+      <v-menu
+        v-model="menu"
+        :close-on-content-click="false"
+        :nudge-width="200"
+        left
+        offset-x
+      >
+        <template #activator="{ on, attrs }">
+          <v-btn
+            v-show="isChecked"
+            dark
+            v-bind="attrs"
+            icon
+            color="green"
+            :disabled="isDone"
+            v-on="on"
+          >
+            <v-icon>mdi-pencil-outline</v-icon>
+          </v-btn>
+        </template>
+        <v-card>
+          <v-text-field v-model="editValue" class="ma-3" hide-details="auto" ></v-text-field>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              text
+              @click="onCancel"
+            >
+              Cancel
+            </v-btn>
+            <v-btn
+              color="teal"
+              text
+              @click="editTodoItem"
+            >
+              Save
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-menu>
+      <v-btn
+        v-show="isChecked"
+        v-model="isDone"
+        class="todo__action mr-2 material-icons"
+        color="green"
+        icon
+        small
+        elevation="2"
+        plain
+        @click="handleDoneTask"
+      >
+        <v-icon v-if="!todo.done" dark>mdi-check-outline</v-icon>
+        <v-icon v-else dark>mdi-restore</v-icon>
+      </v-btn>
+      <v-btn
+        v-show="isChecked"
+        class="todo__action mr-2"
+        color="error"
+        icon
+        small
+        elevation="2"
+        plain
+        @click="handleDeleteTask"
+      >
+        <v-icon>mdi-delete-outline</v-icon>
+      </v-btn>
+      <v-btn
+        v-show="isChecked"
+        class="todo__action mr-2 material-icons"
+        color="primary"
+        icon
+        small
+        elevation="2"
+        plain
+        @click="handlePinTask"
+      >
+        <v-icon v-if="todo.pinTask === false" dark>mdi-pin-outline</v-icon>
+        <v-icon v-else dark>mdi-pin-off-outline</v-icon>
+      </v-btn>
+    </v-col>
   </v-list-item>
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import moment from 'moment'
 
 export default Vue.extend({
   name: 'Todo',
   props: {
-    title: {
-      type: String,
+    todo:{
+      type: Object,
       required: true
-    },
-    id: {
-      type: Number,
-      required: true
-    },
-    checked: {
-      type: Boolean,
-      required: true,
-      default: false
-    },
-    done: {
-      type: Boolean,
-      required: true,
-      default: false
-    },
-    pinTask: {
-      type: Boolean,
-      required: true,
-      default: false
+    }
+  },
+  data(){
+    return {
+      menu: false,
+      isChecked: this.todo.checked,
+      editValue: this.todo.content,
+      created: this.todo._created,
+      updated: this.todo._updated
+    }
+  },
+  computed: {
+    isDone() {
+      return this.todo.done
     }
   },
   methods: {
@@ -96,11 +153,26 @@ export default Vue.extend({
     handleDoneTask () {
       this.$emit('clicked-done')
     },
+    handleEditTask () {
+      this.$emit('clicked-editable')
+    },
     handleDeleteTask () {
       this.$emit('clicked-delete')
     },
     handlePinTask () {
       this.$emit('clicked-pin')
+    },
+    editTodoItem(menu: { altKey: boolean }) {
+      this.menu = menu.altKey
+      this.updated = new Date()
+      this.$emit('editContent', this.editValue, this.todo.id, this.updated )
+    },
+    onCancel(menu: { altKey: boolean }){
+      this.menu = menu.altKey
+      this.editValue = this.todo.content
+    },
+    dateFormat(date: string, format?: string){
+      return moment(date).format(format || 'YYYY/MM/DD HH:mm:ss')
     }
   }
 })

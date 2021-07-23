@@ -30,17 +30,16 @@
       app
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-        <div class="d-flex align-center">
-          <v-img
-            alt="Binh.n Logo"
-            class="mr-2"
-            contain
-            src="./logo-b.png"
-            transition="scale-transition"
-            width="30"
-          />
-        </div>
-      <v-toolbar-title v-text="title" />
+      <div class="d-flex align-center">
+        <v-img
+          alt="Binh.n Logo"
+          class="mr-2"
+          contain
+          src="./logo-b.png"
+          transition="scale-transition"
+          width="30"
+        />
+      </div>
       <v-spacer />
       <v-btn
         href="/about"
@@ -60,7 +59,7 @@
       :absolute="!fixed"
       app
     >
-      <span>&copy; Binh.n {{ new Date().getFullYear() }}</span>
+      <span>&copy; Binh.n 7.2021</span>
     </v-footer>
   </v-app>
 </template>
@@ -80,8 +79,8 @@ export default {
         },
         {
           icon: 'mdi-home',
-          title: 'Main Todo List',
-          to: '/todoMain'
+          title: 'Todo List',
+          to: '/todo'
         }
       ],
       miniVariant: false,

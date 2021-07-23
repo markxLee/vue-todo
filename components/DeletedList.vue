@@ -1,24 +1,24 @@
-b<template>
-  <v-list-item class="todo">
+<template>
+  <v-list-item class="todo border">
     <v-checkbox
-      v-model="checked"
+      v-model="isChecked"
       color="teal"
       disabled
-      :value="this.checked"
+      :value="isChecked"
     ></v-checkbox>
-    <div :class="{ 'todo__title--done': this.done }" class="todo__title">
-      {{ title }}
-    </div>
+    <v-col :class="{ 'todo__content--done': item.done }" class="todo__content">
+      {{ item.content }}
+    </v-col>
     <v-spacer />
     <v-btn
+      v-show="isChecked"
       class="todo__action mr-2 material-icons"
       color="green"
       icon
       small
       elevation="2"
       plain
-      v-on:click="handleRestore"
-      v-show="this.checked"
+      @click="handleRestore"
     >
       <v-icon dark>mdi-restore</v-icon>
     </v-btn>
@@ -30,23 +30,14 @@ import Vue from 'vue'
 export default Vue.extend({
   name: 'DeletedList',
   props: {
-    title: {
-      type: String,
+    item:{
+      type: Object,
       required: true
-    },
-    id: {
-      type: Number,
-      required: true
-    },
-    checked: {
-      type: Boolean,
-      required: true,
-      default: false
-    },
-    done: {
-      type: Boolean,
-      required: true,
-      default: false
+    }
+  },
+    data(){
+    return {
+      isChecked: this.item.checked
     }
   },
   methods: {

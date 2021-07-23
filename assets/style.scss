@@ -18,15 +18,15 @@
 .todo {
   display: flex;
   justify-content: space-between;
-  &__title--done{
+  &__content--done{
       text-decoration: line-through;
       color: teal;
   }
 }
 .pin-task {
 text-decoration: underline;
-color: red;
+color: lightcoral;
 }
-.pin-task {
-color: red;
+.border {
+  border: 1px solid teal;
 }
