@@ -35,7 +35,7 @@ export default Vue.extend({
       required: true
     }
   },
-    data(){
+  data(){
     return {
       isChecked: this.item.checked
     }

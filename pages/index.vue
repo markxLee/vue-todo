@@ -20,7 +20,7 @@
           <v-btn
             color="primary"
             nuxt
-            to="/todoMain"
+            to="/todo"
           >
             Continue
           </v-btn>
