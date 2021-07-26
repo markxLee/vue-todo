@@ -15,8 +15,8 @@
             </template>
             <v-list>
               <v-list-item
-                v-for="(item, index) in items"
-                :key="index + Math.random()"
+                v-for="(item) in items"
+                :key="item.id + Math.random()"
                 @click="handleSelect(item.title, item.id)"
               >
                 <v-list-item-title>{{ item.title }}</v-list-item-title>
@@ -35,9 +35,9 @@
       <v-row v-show="titleList" class="list-title ma-0">My {{ titleList }}</v-row>
       <v-card class="mx-auto" elevation="0">
         <Todo
-          v-for="(todo, index) in listTodo"
+          v-for="(todo) in listTodo"
           v-show="!reveal"
-          :key="index + Math.random()"
+          :key="todo.id + Math.random()"
           :todo="todo"
           @clicked-done="doneTodoItem(todo)"
           @clicked-checked="checkTodoItem(todo)"
@@ -89,6 +89,7 @@ export default Vue.extend({
     DeletedList
   },
   data: () => ({
+    histories: [] as Item[],
     listTodo: [] as Item[],
     listDeleted: [] as Item[],
     items: [
@@ -100,6 +101,9 @@ export default Vue.extend({
     reveal: false
   }),
   watch: {
+    histories (list) {
+      localStorage.histories = JSON.stringify(list)
+    },
     listTodo (newListTodo) {
       localStorage.listTodo = JSON.stringify(newListTodo)
     },
@@ -108,6 +112,9 @@ export default Vue.extend({
     }
   },
   mounted () {
+    if (localStorage.histories) {
+      this.histories = JSON.parse(localStorage.histories)
+    }
     if (localStorage.listTodo) {
       this.listTodo = JSON.parse(localStorage.listTodo)
     }
@@ -122,7 +129,7 @@ export default Vue.extend({
     },
     addTodoItem (content: string) {
       const todoObject: Item = {
-        id: this.listTodo.length + 1,
+        id: this.histories.length + 1,
         content,
         checked: false,
         done: false,
@@ -132,6 +139,7 @@ export default Vue.extend({
         _updated: new Date()
       }
       this.listTodo.push(todoObject)
+      this.histories.push(todoObject)
     },
     editTodoItem (editContent: string, id: number, updated: Date) {
       const index = this.listTodo.findIndex((item: Item) => item.id === id)
@@ -168,21 +176,24 @@ export default Vue.extend({
       this.listTodo = newList
     },
     pinTodoItem (todo: Item) {
+      const pinFlg = todo.pinTask
+      const doneFlg = todo.done
       const index = this.listTodo.findIndex(
         (item: { id: number }) => item.id === todo.id
       )
       const itemPin = this.listTodo.filter(
         (item: { id: number }) => item.id === todo.id
       )[0]
+      const unpinIndex = this.listTodo.findIndex((item) => item.pinTask === false)
       this.listTodo.splice(index, 1)
-      if (!todo.pinTask) {
+      if (!pinFlg) {
         this.listTodo.splice(0, 0, itemPin)
-      } else if (todo.pinTask && !todo.done) {
-        this.listTodo.splice(todo.id - 1, 0, itemPin)
+      } else if (pinFlg && !doneFlg) {
+        this.listTodo.splice(unpinIndex - 1, 0, itemPin)
       } else {
         this.listTodo.splice(this.listTodo.length, 0, itemPin)
       }
-      todo.pinTask = !todo.pinTask
+      todo.pinTask = !pinFlg
     },
     handleSelect (title: string, id: number) {
       if (id === 1) {
