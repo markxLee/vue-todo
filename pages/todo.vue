@@ -118,6 +118,10 @@ export default {
   },
   beforeMount() {
     this.loadDataFromLocalStorage()
+    window.addEventListener('beforeunload', this.saveDataToLocalStorage)
+  },
+  beforeDestroy() {
+    this.saveDataToLocalStorage()
   },
   methods: {
     addNewTask() {
@@ -131,24 +135,20 @@ export default {
           isEditing: false,
         })
         this.taskIdCount += 1
-        this.saveDataToLocalStorage()
       }
       this.newTask = ''
     },
     completeTask(id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       this.tasks[taskId].isCompleted = !this.tasks[taskId].isCompleted
-      this.saveDataToLocalStorage()
     },
     pinTask(id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       this.tasks[taskId].isPin = !this.tasks[taskId].isPin
-      this.saveDataToLocalStorage()
     },
     deleteTask(id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
       this.tasks.splice(taskId, 1)
-      this.saveDataToLocalStorage()
     },
 
     editTask(id) {
@@ -162,7 +162,6 @@ export default {
         this.tasks[taskId].content = this.beforeEditCache
       }
       this.tasks[taskId].isEditing = false
-      this.saveDataToLocalStorage()
     },
     cancelEdit(id) {
       const taskId = this.tasks.findIndex((task) => task.id === id)
@@ -171,11 +170,9 @@ export default {
     },
     completeAllTasks() {
       this.tasks.forEach((task) => (task.isCompleted = true))
-      this.saveDataToLocalStorage()
     },
     clearCompletedTasks() {
       this.tasks = this.tasks.filter((task) => !task.isCompleted)
-      this.saveDataToLocalStorage()
     },
     loadDataFromLocalStorage() {
       const taskIdCount = localStorage.getItem('taskIdCount')

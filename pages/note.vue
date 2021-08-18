@@ -146,6 +146,10 @@ export default {
   },
   beforeMount() {
     this.loadDataFromLocalStorage()
+    window.addEventListener('beforeunload', this.saveDataToLocalStorage)
+  },
+  beforeDestroy() {
+    this.saveDataToLocalStorage()
   },
   methods: {
     completeAddNewNote() {
@@ -158,7 +162,6 @@ export default {
           isPin: false,
         })
         this.noteIdCount += 1
-        this.saveDataToLocalStorage()
       }
       this.newNote = ''
     },
@@ -168,12 +171,10 @@ export default {
     pinNote(id) {
       const noteId = this.notes.findIndex((note) => note.id === id)
       this.notes[noteId].isPin = !this.notes[noteId].isPin
-      this.saveDataToLocalStorage()
     },
     deleteNote(id) {
       const noteId = this.notes.findIndex((note) => note.id === id)
       this.notes.splice(noteId, 1)
-      this.saveDataToLocalStorage()
     },
     editNote(id) {
       const noteId = this.notes.findIndex((note) => note.id === id)
@@ -188,7 +189,6 @@ export default {
       }
       this.noteIdEdit = null
       this.isShowEditDialog = false
-      this.saveDataToLocalStorage()
     },
     cancelEdit() {
       this.noteIdEdit = null
