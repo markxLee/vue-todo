@@ -102,8 +102,7 @@
 </template>
 
 <script>
-// @ is an alias to /src
-import NoteGroup from '@/components/NoteGroup.vue'
+import NoteGroup from '~/components/note/NoteGroup.vue'
 
 export default {
   name: 'Note',

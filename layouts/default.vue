@@ -22,6 +22,16 @@
   </v-app>
 </template>
 
+<script>
+import NuxtLogo from '~/components/logo/NuxtLogo.vue'
+
+export default {
+  components: {
+    NuxtLogo,
+  },
+}
+</script>
+
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
