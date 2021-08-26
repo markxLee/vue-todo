@@ -23,12 +23,23 @@
       <todo-control></todo-control>
 
       <!-- Group todo list -->
-      <todo-group
+      <group-item
         v-for="(taskGroup, index) in taskGroups"
+        v-show="taskGroup.taskList.length > 0"
         :key="index"
-        :group-header="taskGroup.groupHeader"
-        :task-list="taskGroup.taskList"
-      ></todo-group>
+      >
+        <template #header>
+          <h3>{{ taskGroup.groupHeader }}: {{ taskGroup.taskList.length }}</h3>
+        </template>
+        <template #body>
+          <todo-item
+            v-for="task in taskGroup.taskList"
+            :key="task.id"
+            :task="task"
+            class="mt-1"
+          ></todo-item>
+        </template>
+      </group-item>
     </v-card>
   </div>
 </template>
@@ -36,13 +47,15 @@
 <script>
 import TodoInput from '~/components/todo/TodoInput.vue'
 import TodoControl from '~/components/todo/TodoControl.vue'
-import TodoGroup from '~/components/todo/TodoGroup.vue'
+import GroupItem from '~/components/common/GroupItem.vue'
+import TodoItem from '~/components/todo/TodoItem.vue'
 
 export default {
   components: {
     TodoInput,
     TodoControl,
-    TodoGroup,
+    GroupItem,
+    TodoItem,
   },
   head: {
     title: 'Todo',

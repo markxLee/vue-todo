@@ -20,24 +20,37 @@
       <note-input></note-input>
 
       <!-- Group note list -->
-      <note-group
+      <group-item
         v-for="(noteGroup, index) in noteGroups"
+        v-show="noteGroup.noteList.length > 0"
         :key="index"
-        :group-header="noteGroup.groupHeader"
-        :note-list="noteGroup.noteList"
-      ></note-group>
+      >
+        <template #header>
+          <h3>{{ noteGroup.groupHeader }}: {{ noteGroup.noteList.length }}</h3>
+        </template>
+        <template #body>
+          <note-item
+            v-for="note in noteGroup.noteList"
+            :key="note.id"
+            :note="note"
+            class="mt-1"
+          ></note-item>
+        </template>
+      </group-item>
     </v-card>
   </div>
 </template>
 
 <script>
 import NoteInput from '~/components/note/NoteInput.vue'
-import NoteGroup from '~/components/note/NoteGroup.vue'
+import GroupItem from '~/components/common/GroupItem.vue'
+import NoteItem from '~/components/note/NoteItem.vue'
 
 export default {
   components: {
     NoteInput,
-    NoteGroup,
+    GroupItem,
+    NoteItem,
   },
   head: {
     title: 'Note',
