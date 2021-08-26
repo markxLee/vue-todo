@@ -1,5 +1,9 @@
 <template>
-  <v-list-item class="elevation-2 rounded todo-item">
+  <v-list-item
+    class="elevation-2 rounded todo-item"
+    @click="$router.push(`/todo/${task.id}`)"
+    @dblclick="editTask()"
+  >
     <!-- Complete todo -->
     <v-list-item-action class="mx-0">
       <v-btn icon @click="completeTask()">
@@ -27,7 +31,6 @@
       <v-list-item-title
         v-else
         :class="{ done: task.isCompleted }"
-        @dblclick="editTask()"
         v-text="task.content"
       ></v-list-item-title>
     </v-list-item-content>

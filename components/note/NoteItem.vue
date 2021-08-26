@@ -1,5 +1,8 @@
 <template>
-  <div class="elevation-2 rounded note-item">
+  <div
+    class="elevation-2 rounded note-item"
+    @click="$router.push(`/note/${note.id}`)"
+  >
     <!-- Note header -->
     <v-row
       justify="space-between"
