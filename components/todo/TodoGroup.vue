@@ -1,5 +1,5 @@
 <template>
-  <v-list v-if="taskList.length > 0" class="pa-0 pt-2">
+  <v-list v-if="taskList.length > 0" class="pa-0 mt-2">
     <!-- Group header -->
     <v-btn text class="text-none pa-0 px-2" @click="toggleExpandTaskList()">
       <v-icon v-if="isExpandTaskList" color="yellow darken-3">

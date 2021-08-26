@@ -39,7 +39,6 @@ import TodoControl from '~/components/todo/TodoControl.vue'
 import TodoGroup from '~/components/todo/TodoGroup.vue'
 
 export default {
-  name: 'Todo',
   components: {
     TodoInput,
     TodoControl,
