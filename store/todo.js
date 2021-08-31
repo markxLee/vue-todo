@@ -15,6 +15,14 @@ export const mutations = {
         isEditing: false,
       })
       state.taskIdCount += 1
+
+      this.$fire.firestore.collection('tasks').doc().set({
+        id: state.taskIdCount,
+        content: newTaskValidated,
+        isCompleted: false,
+        isPin: false,
+        isEditing: false,
+      })
     }
   },
   completeTask(state, task) {
