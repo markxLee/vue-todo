@@ -16,7 +16,7 @@
 
     <!-- App body -->
     <v-card height="auto" width="600" class="pa-4" :elevation="6">
-      <todo-item :task="currentTask"></todo-item>
+      <todo-item :task="currentTask || {}"></todo-item>
     </v-card>
   </div>
 </template>
@@ -29,21 +29,14 @@ export default {
     TodoItem,
   },
   computed: {
-    taskId() {
-      return this.$route.params.id
-    },
-    tasks() {
-      return this.$store.state.todo.tasks
-    },
     currentTask() {
-      const index = this.tasks.findIndex(
-        (taskItem) => taskItem.id === Number(this.taskId)
-      )
-      return { ...this.tasks[index] }
+      return this.$store.getters['todo/getCurrentTask']
     },
   },
   created() {
-    this.$store.commit('todo/loadDataFromLocalStorage')
+    this.$store.dispatch('todo/setCurrentTaskRef', {
+      id: this.$route.params.id,
+    })
   },
 }
 </script>

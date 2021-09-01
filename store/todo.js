@@ -1,76 +1,155 @@
+import { v1 as uuidv1 } from 'uuid'
+import { firestoreAction } from 'vuexfire'
+import firebase from '~/plugins/firebase'
+const db = firebase.firestore()
+
 export const state = () => ({
   tasks: [],
-  taskIdCount: 0,
+  currentTask: {},
+  isFireStoreMode: true,
 })
 
-export const mutations = {
-  addNewTask(state, newTask) {
-    const newTaskValidated = newTask.trim()
+export const getters = {
+  getTasks(state) {
+    return state.tasks
+  },
+  getImportantTasks(state) {
+    return state.tasks.filter((task) => !task.isCompleted && task.isPin)
+  },
+  getCurrentTasks(state) {
+    return state.tasks.filter((task) => !task.isCompleted && !task.isPin)
+  },
+  getCompletedTasks(state) {
+    return state.tasks.filter((task) => task.isCompleted)
+  },
+  getCurrentTask(state) {
+    return state.currentTask
+  },
+}
+
+export const actions = {
+  setTasksRef: firestoreAction(({ bindFirestoreRef }, params) => {
+    bindFirestoreRef('tasks', db.collection('tasks').orderBy('_created', 'asc'))
+  }),
+  setCurrentTaskRef: firestoreAction(({ bindFirestoreRef }, params) => {
+    bindFirestoreRef('currentTask', db.collection('tasks').doc(params.id))
+  }),
+
+  addNewTask({ state }, params) {
+    const newTaskValidated = params.newTask.trim()
     if (newTaskValidated) {
-      state.tasks.push({
-        id: state.taskIdCount,
+      const ref = db.collection('tasks')
+      const refId = ref.doc().id
+      const data = {
+        id: state.isFireStoreMode ? refId : uuidv1(),
         content: newTaskValidated,
         isCompleted: false,
         isPin: false,
         isEditing: false,
-      })
-      state.taskIdCount += 1
+        _created: firebase.firestore.FieldValue.serverTimestamp(),
+        _updated: firebase.firestore.FieldValue.serverTimestamp(),
+      }
 
-      this.$fire.firestore.collection('tasks').doc().set({
-        id: state.taskIdCount,
-        content: newTaskValidated,
-        isCompleted: false,
-        isPin: false,
-        isEditing: false,
-      })
-    }
-  },
-  completeTask(state, task) {
-    const index = state.tasks.findIndex((taskItem) => taskItem.id === task.id)
-    state.tasks[index].isCompleted = !state.tasks[index].isCompleted
-  },
-  pinTask(state, task) {
-    const index = state.tasks.findIndex((taskItem) => taskItem.id === task.id)
-    state.tasks[index].isPin = !state.tasks[index].isPin
-  },
-  deleteTask(state, task) {
-    const index = state.tasks.findIndex((taskItem) => taskItem.id === task.id)
-    state.tasks.splice(index, 1)
-  },
-  updateTask(state, { task, newContent }) {
-    const index = state.tasks.findIndex((taskItem) => taskItem.id === task.id)
-    state.tasks[index].content = newContent
-  },
-  completeAllTasks(state) {
-    state.tasks.forEach((task) => (task.isCompleted = true))
-  },
-  clearCompletedTasks(state) {
-    state.tasks = state.tasks.filter((task) => !task.isCompleted)
-  },
-  loadDataFromLocalStorage(state) {
-    const taskIdCount = localStorage.getItem('taskIdCount')
-    const tasks = localStorage.getItem('tasks')
+      if (state.isFireStoreMode) {
+        ref.doc(refId).set(data)
+      }
 
-    if (taskIdCount && tasks) {
-      try {
-        state.tasks = JSON.parse(tasks)
-        if (state.tasks.length === 0) {
-          state.taskIdCount = 0
-          localStorage.setItem('taskIdCount', JSON.stringify(state.taskIdCount))
-        }
-        if (state.tasks.length) {
-          state.taskIdCount = JSON.parse(taskIdCount)
-        }
-      } catch (e) {
-        localStorage.removeItem('taskIdCount')
-        localStorage.removeItem('tasks')
+      if (!state.isFireStoreMode) {
+        state.tasks.push(data)
       }
     }
   },
+  completeTask({ state }, params) {
+    if (state.isFireStoreMode) {
+      db.collection('tasks')
+        .doc(params.task.id)
+        .update({ isCompleted: !params.task.isCompleted })
+    }
+
+    if (!state.isFireStoreMode) {
+      const index = state.tasks.findIndex(
+        (taskItem) => taskItem.id === params.task.id
+      )
+      state.tasks[index].isCompleted = !state.tasks[index].isCompleted
+    }
+  },
+  pinTask({ state }, params) {
+    if (state.isFireStoreMode) {
+      db.collection('tasks')
+        .doc(params.task.id)
+        .update({ isPin: !params.task.isPin })
+    }
+
+    if (!state.isFireStoreMode) {
+      const index = state.tasks.findIndex(
+        (taskItem) => taskItem.id === params.task.id
+      )
+      state.tasks[index].isPin = !state.tasks[index].isPin
+    }
+  },
+  deleteTask({ state }, params) {
+    if (state.isFireStoreMode) {
+      db.collection('tasks').doc(params.task.id).delete()
+    }
+
+    if (!state.isFireStoreMode) {
+      const index = state.tasks.findIndex(
+        (taskItem) => taskItem.id === params.task.id
+      )
+      state.tasks.splice(index, 1)
+    }
+  },
+  updateTask({ state }, params) {
+    if (state.isFireStoreMode) {
+      db.collection('tasks')
+        .doc(params.task.id)
+        .update({ content: !params.newContent })
+    }
+
+    if (!state.isFireStoreMode) {
+      const index = state.tasks.findIndex(
+        (taskItem) => taskItem.id === params.task.id
+      )
+      state.tasks[index].content = params.newContent
+    }
+  },
+  completeAllTasks({ state }) {
+    if (state.isFireStoreMode) {
+      const batch = db.batch()
+      state.tasks.forEach((task) =>
+        batch.update(db.collection('tasks').doc(task.id), { isCompleted: true })
+      )
+      batch.commit()
+    }
+
+    if (!state.isFireStoreMode) {
+      state.tasks.forEach((task) => (task.isCompleted = true))
+    }
+  },
+  clearCompletedTasks({ state }) {
+    if (state.isFireStoreMode) {
+      const deleteTask = state.tasks.filter((task) => !task.isCompleted)
+      const batch = db.batch()
+      deleteTask.forEach((task) =>
+        batch.delete(db.collection('tasks').doc(task.id))
+      )
+      batch.commit()
+    }
+
+    if (!state.isFireStoreMode) {
+      state.tasks = state.tasks.filter((task) => !task.isCompleted)
+    }
+  },
+  loadDataFromLocalStorage(state) {
+    try {
+      const tasks = localStorage.getItem('tasks')
+      state.tasks = JSON.parse(tasks)
+    } catch (e) {
+      localStorage.removeItem('tasks')
+    }
+  },
   saveDataToLocalStorage(state) {
-    const parsedTaskIdCount = JSON.stringify(state.taskIdCount)
     const parsedTasks = JSON.stringify(state.tasks)
-    localStorage.setItem('taskIdCount', parsedTaskIdCount)
     localStorage.setItem('tasks', parsedTasks)
   },
 }

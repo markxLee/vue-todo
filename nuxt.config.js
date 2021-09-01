@@ -24,7 +24,7 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: [{ src: '~/plugins/firebase.js', ssr: false }],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -41,23 +41,6 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
-    [
-      '@nuxtjs/firebase',
-      {
-        config: {
-          apiKey: 'AIzaSyAJG6q5iR7mYC2tPrSNfa9sjcL1gqwgwjE',
-          authDomain: 'test-project-c6572.firebaseapp.com',
-          projectId: 'test-project-c6572',
-          storageBucket: 'test-project-c6572.appspot.com',
-          messagingSenderId: '171124635220',
-          appId: '1:171124635220:web:e05145e99859e8657d5fc1',
-          measurementId: 'G-X4TLKYVXPK',
-        },
-        services: {
-          firestore: true,
-        },
-      },
-    ],
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios

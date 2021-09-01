@@ -62,48 +62,42 @@ export default {
   },
   computed: {
     tasks() {
-      return this.$store.state.todo.tasks
+      return this.$store.getters['todo/getTasks']
     },
     taskGroups() {
-      const importantTasks = this.tasks.filter(
-        (task) => !task.isCompleted && task.isPin
-      )
-      const currentTasks = this.tasks.filter(
-        (task) => !task.isCompleted && !task.isPin
-      )
-      const completedTasks = this.tasks.filter((task) => task.isCompleted)
-      const taskGroups = [
+      return [
         {
           groupHeader: 'Important tasks',
-          taskList: importantTasks,
+          taskList: this.$store.getters['todo/getImportantTasks'] || [],
         },
         {
           groupHeader: 'Current tasks',
-          taskList: currentTasks,
+          taskList: this.$store.getters['todo/getCurrentTasks'] || [],
         },
         {
           groupHeader: 'Completed tasks',
-          taskList: completedTasks,
+          taskList: this.$store.getters['todo/getCompletedTasks'] || [],
         },
       ]
-
-      return taskGroups
     },
   },
-  beforeMount() {
-    this.loadDataFromLocalStorage()
-    window.addEventListener('beforeunload', this.saveDataToLocalStorage)
+  created() {
+    this.$store.dispatch('todo/setTasksRef')
   },
-  beforeDestroy() {
-    this.saveDataToLocalStorage()
-  },
-  methods: {
-    loadDataFromLocalStorage() {
-      this.$store.commit('todo/loadDataFromLocalStorage')
-    },
-    saveDataToLocalStorage() {
-      this.$store.commit('todo/saveDataToLocalStorage')
-    },
-  },
+  // beforeMount() {
+  //   this.loadDataFromLocalStorage()
+  //   window.addEventListener('beforeunload', this.saveDataToLocalStorage)
+  // },
+  // beforeDestroy() {
+  //   this.saveDataToLocalStorage()
+  // },
+  // methods: {
+  //   loadDataFromLocalStorage() {
+  //     this.$store.commit('todo/loadDataFromLocalStorage')
+  //   },
+  //   saveDataToLocalStorage() {
+  //     this.$store.commit('todo/saveDataToLocalStorage')
+  //   },
+  // },
 }
 </script>

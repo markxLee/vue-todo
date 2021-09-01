@@ -6,7 +6,7 @@
   >
     <!-- Complete todo -->
     <v-list-item-action class="mx-0">
-      <v-btn icon @click="completeTask()">
+      <v-btn icon @click="completeTask">
         <v-icon v-if="!task.isCompleted" color="grey lighten-1">
           mdi-radiobox-blank
         </v-icon>
@@ -24,9 +24,9 @@
         outlined
         color="yellow darken-3"
         class="ma-0 pa-0"
-        @keydown.enter="updateTask()"
-        @keydown.esc="cancelEdit()"
-        @blur="cancelEdit()"
+        @keydown.enter="updateTask"
+        @keydown.esc="cancelEdit"
+        @blur="cancelEdit"
       />
       <v-list-item-title
         v-else
@@ -37,7 +37,7 @@
 
     <!-- Pin todo -->
     <v-list-item-action>
-      <v-btn icon @click="pinTask()">
+      <v-btn icon @click="pinTask">
         <v-icon v-if="!task.isPin" color="grey lighten-1">
           mdi-star-outline
         </v-icon>
@@ -47,7 +47,7 @@
 
     <!-- Delete todo -->
     <v-list-item-action>
-      <v-btn icon @click="deleteTask()">
+      <v-btn icon @click="deleteTask">
         <v-icon color="grey lighten-1">mdi-close</v-icon>
       </v-btn>
     </v-list-item-action>
@@ -77,14 +77,17 @@ export default {
     }
   },
   methods: {
-    completeTask() {
-      this.$store.commit('todo/completeTask', this.task)
+    completeTask(event) {
+      event.stopPropagation()
+      this.$store.dispatch('todo/completeTask', { task: this.task })
     },
-    pinTask() {
-      this.$store.commit('todo/pinTask', this.task)
+    pinTask(event) {
+      event.stopPropagation()
+      this.$store.dispatch('todo/pinTask', { task: this.task })
     },
-    deleteTask() {
-      this.$store.commit('todo/deleteTask', this.task)
+    deleteTask(event) {
+      event.stopPropagation()
+      this.$store.dispatch('todo/deleteTask', { task: this.task })
     },
     editTask() {
       this.isEditing = true
@@ -92,7 +95,7 @@ export default {
     },
     updateTask() {
       this.isEditing = false
-      this.$store.commit('todo/updateTask', {
+      this.$store.dispatch('todo/updateTask', {
         task: this.task,
         newContent: this.editedContent,
       })

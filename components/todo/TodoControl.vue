@@ -35,10 +35,10 @@ export default {
   },
   methods: {
     completeAllTasks() {
-      this.$store.commit('todo/completeAllTasks')
+      this.$store.dispatch('todo/completeAllTasks')
     },
     clearCompletedTasks() {
-      this.$store.commit('todo/clearCompletedTasks')
+      this.$store.dispatch('todo/clearCompletedTasks')
     },
   },
 }
