@@ -1,12 +1,12 @@
 import { v1 as uuidv1 } from 'uuid'
-import { firestoreAction } from 'vuexfire'
+import { firebaseAction } from 'vuexfire'
 import firebase from '~/plugins/firebase'
-const db = firebase.firestore()
+const db = firebase.database()
 
 export const state = () => ({
   tasks: [],
   currentTask: {},
-  isFireStoreMode: true,
+  isFireBaseMode: true,
 })
 
 export const getters = {
@@ -28,45 +28,42 @@ export const getters = {
 }
 
 export const actions = {
-  setTasksRef: firestoreAction(({ bindFirestoreRef }, params) => {
-    bindFirestoreRef('tasks', db.collection('tasks').orderBy('_created', 'asc'))
+  setTasksRef: firebaseAction(({ bindFirebaseRef }, params) => {
+    bindFirebaseRef('tasks', db.ref('tasks'))
   }),
-  setCurrentTaskRef: firestoreAction(({ bindFirestoreRef }, params) => {
-    bindFirestoreRef('currentTask', db.collection('tasks').doc(params.id))
+  setCurrentTaskRef: firebaseAction(({ bindFirebaseRef }, params) => {
+    bindFirebaseRef('currentTask', db.ref(`tasks/${params.id}`))
   }),
 
   addNewTask({ state }, params) {
     const newTaskValidated = params.newTask.trim()
     if (newTaskValidated) {
-      const ref = db.collection('tasks')
-      const refId = ref.doc().id
       const data = {
-        id: state.isFireStoreMode ? refId : uuidv1(),
+        id: uuidv1(),
         content: newTaskValidated,
         isCompleted: false,
         isPin: false,
-        isEditing: false,
-        _created: firebase.firestore.FieldValue.serverTimestamp(),
-        _updated: firebase.firestore.FieldValue.serverTimestamp(),
+        _created: firebase.database.ServerValue.TIMESTAMP,
+        _updated: firebase.database.ServerValue.TIMESTAMP,
       }
 
-      if (state.isFireStoreMode) {
-        ref.doc(refId).set(data)
+      if (state.isFireBaseMode) {
+        db.ref(`tasks/${data.id}`).set(data)
       }
 
-      if (!state.isFireStoreMode) {
+      if (!state.isFireBaseMode) {
         state.tasks.push(data)
       }
     }
   },
   completeTask({ state }, params) {
-    if (state.isFireStoreMode) {
-      db.collection('tasks')
-        .doc(params.task.id)
-        .update({ isCompleted: !params.task.isCompleted })
+    if (state.isFireBaseMode) {
+      db.ref(`tasks/${params.task.id}`).update({
+        isCompleted: !params.task.isCompleted,
+      })
     }
 
-    if (!state.isFireStoreMode) {
+    if (!state.isFireBaseMode) {
       const index = state.tasks.findIndex(
         (taskItem) => taskItem.id === params.task.id
       )
@@ -74,13 +71,11 @@ export const actions = {
     }
   },
   pinTask({ state }, params) {
-    if (state.isFireStoreMode) {
-      db.collection('tasks')
-        .doc(params.task.id)
-        .update({ isPin: !params.task.isPin })
+    if (state.isFireBaseMode) {
+      db.ref(`tasks/${params.task.id}`).update({ isPin: !params.task.isPin })
     }
 
-    if (!state.isFireStoreMode) {
+    if (!state.isFireBaseMode) {
       const index = state.tasks.findIndex(
         (taskItem) => taskItem.id === params.task.id
       )
@@ -88,11 +83,11 @@ export const actions = {
     }
   },
   deleteTask({ state }, params) {
-    if (state.isFireStoreMode) {
-      db.collection('tasks').doc(params.task.id).delete()
+    if (state.isFireBaseMode) {
+      db.ref(`tasks/${params.task.id}`).remove()
     }
 
-    if (!state.isFireStoreMode) {
+    if (!state.isFireBaseMode) {
       const index = state.tasks.findIndex(
         (taskItem) => taskItem.id === params.task.id
       )
@@ -100,13 +95,11 @@ export const actions = {
     }
   },
   updateTask({ state }, params) {
-    if (state.isFireStoreMode) {
-      db.collection('tasks')
-        .doc(params.task.id)
-        .update({ content: !params.newContent })
+    if (state.isFireBaseMode) {
+      db.ref(`tasks/${params.task.id}`).update({ content: params.newContent })
     }
 
-    if (!state.isFireStoreMode) {
+    if (!state.isFireBaseMode) {
       const index = state.tasks.findIndex(
         (taskItem) => taskItem.id === params.task.id
       )
@@ -114,29 +107,30 @@ export const actions = {
     }
   },
   completeAllTasks({ state }) {
-    if (state.isFireStoreMode) {
-      const batch = db.batch()
-      state.tasks.forEach((task) =>
-        batch.update(db.collection('tasks').doc(task.id), { isCompleted: true })
-      )
-      batch.commit()
+    if (state.isFireBaseMode) {
+      state.tasks.forEach((task) => {
+        !task.isCompleted &&
+          db.ref(`tasks/${task.id}`).update({ isCompleted: true })
+      })
     }
 
-    if (!state.isFireStoreMode) {
+    if (!state.isFireBaseMode) {
       state.tasks.forEach((task) => (task.isCompleted = true))
     }
   },
   clearCompletedTasks({ state }) {
-    if (state.isFireStoreMode) {
-      const deleteTask = state.tasks.filter((task) => !task.isCompleted)
-      const batch = db.batch()
-      deleteTask.forEach((task) =>
-        batch.delete(db.collection('tasks').doc(task.id))
-      )
-      batch.commit()
+    if (state.isFireBaseMode) {
+      const updateData = {}
+      state.tasks.forEach((task) => {
+        if (task.isCompleted) {
+          updateData[`tasks/${task.id}`] = null
+        }
+      })
+
+      db.ref().update(updateData)
     }
 
-    if (!state.isFireStoreMode) {
+    if (!state.isFireBaseMode) {
       state.tasks = state.tasks.filter((task) => !task.isCompleted)
     }
   },
