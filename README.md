@@ -22,3 +22,4 @@ For the team to learn about vue.
 - Thêm chức năng auth (theo framework hoặc jwt auth)
 - Thêm màn hình todo list lưu dữ liệu vào backend server, xử dụng thư viện axios của vue để kết nối api
 - Thêm chức năng sync qua lại giữa các kiểu lưu todolist ...
+- 
