@@ -36,6 +36,7 @@ export default {
   created() {
     this.$store.dispatch('todo/setCurrentTaskRef', {
       id: this.$route.params.id,
+      isBinding: true,
     })
   },
 }

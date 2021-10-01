@@ -75,6 +75,10 @@ export const mutations = {
   clearCompletedTasks(state) {
     state.tasks = state.tasks.filter((task) => !task.isCompleted)
   },
+  setCurrentTask(state, params) {
+    const index = state.tasks.findIndex((taskItem) => taskItem.id === params.id)
+    state.currentTask = Object.assign({}, state.tasks[index])
+  },
 }
 
 export const actions = {
@@ -83,13 +87,20 @@ export const actions = {
       if (params.isBinding) {
         bindFirebaseRef('tasks', db.ref('tasks'))
       } else {
-        unbindFirebaseRef('tasks', db.ref('tasks'))
+        unbindFirebaseRef('tasks')
       }
     }
   ),
-  setCurrentTaskRef: firebaseAction(({ bindFirebaseRef }, params) => {
-    bindFirebaseRef('currentTask', db.ref(`tasks/${params.id}`))
-  }),
+  setCurrentTaskRef: firebaseAction(
+    ({ bindFirebaseRef, unbindFirebaseRef, commit }, params) => {
+      if (params.isBinding) {
+        bindFirebaseRef('currentTask', db.ref(`tasks/${params.id}`))
+      } else {
+        unbindFirebaseRef('currentTask')
+        commit('setCurrentTask', params)
+      }
+    }
+  ),
 
   addNewTask({ state, commit }, params) {
     const newTaskValidated = params.newTask.trim()
