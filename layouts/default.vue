@@ -6,8 +6,8 @@
       </nuxt-link>
 
       <v-row justify="end" class="ma-0 ml-1">
-        <nuxt-link to="/Note" class="nav-link">Note</nuxt-link>
-        <nuxt-link to="/Todo" class="nav-link">Todo</nuxt-link>
+        <nuxt-link to="/note" class="nav-link">Note</nuxt-link>
+        <nuxt-link to="/todoLocalStorage" class="nav-link">Todo</nuxt-link>
         <nuxt-link to="/" class="nav-link">Home</nuxt-link>
       </v-row>
     </v-app-bar>

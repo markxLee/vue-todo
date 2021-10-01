@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <v-container>
     <!-- App name -->
     <div
       class="
@@ -12,6 +12,18 @@
       "
     >
       Vue Todo
+    </div>
+
+    <!-- Storage mode -->
+    <div class="d-flex justify-end">
+      <v-radio-group v-model="isFireBaseMode" row readonly>
+        <v-radio label="Local Storage" :value="false"></v-radio>
+        <v-radio
+          label="Realtime Database"
+          :value="true"
+          @click="$router.push('todoRTDB')"
+        ></v-radio>
+      </v-radio-group>
     </div>
 
     <!-- App body -->
@@ -41,7 +53,7 @@
         </template>
       </group-item>
     </v-card>
-  </div>
+  </v-container>
 </template>
 
 <script>
@@ -56,6 +68,11 @@ export default {
     TodoControl,
     GroupItem,
     TodoItem,
+  },
+  data() {
+    return {
+      storageMode: '0',
+    }
   },
   head: {
     title: 'Todo',
@@ -80,24 +97,38 @@ export default {
         },
       ]
     },
+    STORAGE_MODE() {
+      return {
+        LOCAL_STORAGE: '0',
+        REALTIME_DATABASE: '1',
+      }
+    },
+    isFireBaseMode() {
+      return this.$store.getters['todo/getIsFireBaseMode']
+    },
   },
-  created() {
-    this.$store.dispatch('todo/setTasksRef')
+  beforeMount() {
+    this.initialSettingForLocalStorage()
   },
-  // beforeMount() {
-  //   this.loadDataFromLocalStorage()
-  //   window.addEventListener('beforeunload', this.saveDataToLocalStorage)
-  // },
-  // beforeDestroy() {
-  //   this.saveDataToLocalStorage()
-  // },
-  // methods: {
-  //   loadDataFromLocalStorage() {
-  //     this.$store.commit('todo/loadDataFromLocalStorage')
-  //   },
-  //   saveDataToLocalStorage() {
-  //     this.$store.commit('todo/saveDataToLocalStorage')
-  //   },
-  // },
+  beforeDestroy() {
+    this.saveDataToLocalStorage()
+  },
+  methods: {
+    loadDataFromLocalStorage() {
+      this.$store.dispatch('todo/loadDataFromLocalStorage')
+    },
+    saveDataToLocalStorage() {
+      this.$store.dispatch('todo/saveDataToLocalStorage')
+    },
+    initialSettingForLocalStorage() {
+      this.$store.dispatch('todo/setFirebaseMode', {
+        isFireBaseMode: false,
+      })
+      this.$store.dispatch('todo/setTasksRef', { isBinding: false })
+
+      this.loadDataFromLocalStorage()
+      window.addEventListener('beforeunload', this.saveDataToLocalStorage)
+    },
+  },
 }
 </script>

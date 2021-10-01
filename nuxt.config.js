@@ -67,4 +67,15 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
+
+  // env information using to connect width realtime database
+  env: {
+    API_KEY: 'AIzaSyAJG6q5iR7mYC2tPrSNfa9sjcL1gqwgwjE',
+    AUTH_DOMAIN: 'test-project-c6572.firebaseapp.com',
+    PROJECT_ID: 'test-project-c6572',
+    STORAGE_BUCKET: 'test-project-c6572.appspot.com',
+    MESSAGING_SENDER_ID: '171124635220',
+    APP_ID: '1:171124635220:web:e05145e99859e8657d5fc1',
+    MEASUREMENT_ID: 'G-X4TLKYVXPK',
+  },
 }

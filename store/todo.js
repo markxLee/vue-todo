@@ -6,7 +6,7 @@ const db = firebase.database()
 export const state = () => ({
   tasks: [],
   currentTask: {},
-  isFireBaseMode: true,
+  isFireBaseMode: false,
 })
 
 export const getters = {
@@ -25,17 +25,73 @@ export const getters = {
   getCurrentTask(state) {
     return state.currentTask
   },
+  getIsFireBaseMode(state) {
+    return state.isFireBaseMode
+  },
+}
+
+export const mutations = {
+  setFirebaseMode(state, params) {
+    state.isFireBaseMode = params.isFireBaseMode
+  },
+  loadDataFromLocalStorage(state) {
+    try {
+      const tasks = localStorage.getItem('tasks')
+      state.tasks = tasks ? JSON.parse(tasks) : []
+    } catch (e) {
+      localStorage.removeItem('tasks')
+    }
+  },
+  addNewTask(state, params) {
+    state.tasks.push(params.data)
+  },
+  completeTask(state, params) {
+    const index = state.tasks.findIndex(
+      (taskItem) => taskItem.id === params.task.id
+    )
+    state.tasks[index].isCompleted = !state.tasks[index].isCompleted
+  },
+  pinTask(state, params) {
+    const index = state.tasks.findIndex(
+      (taskItem) => taskItem.id === params.task.id
+    )
+    state.tasks[index].isPin = !state.tasks[index].isPin
+  },
+  deleteTask(state, params) {
+    const index = state.tasks.findIndex(
+      (taskItem) => taskItem.id === params.task.id
+    )
+    state.tasks.splice(index, 1)
+  },
+  updateTask(state, params) {
+    const index = state.tasks.findIndex(
+      (taskItem) => taskItem.id === params.task.id
+    )
+    state.tasks[index].content = params.newContent
+  },
+  completeAllTasks(state) {
+    state.tasks.forEach((task) => (task.isCompleted = true))
+  },
+  clearCompletedTasks(state) {
+    state.tasks = state.tasks.filter((task) => !task.isCompleted)
+  },
 }
 
 export const actions = {
-  setTasksRef: firebaseAction(({ bindFirebaseRef }, params) => {
-    bindFirebaseRef('tasks', db.ref('tasks'))
-  }),
+  setTasksRef: firebaseAction(
+    ({ bindFirebaseRef, unbindFirebaseRef }, params) => {
+      if (params.isBinding) {
+        bindFirebaseRef('tasks', db.ref('tasks'))
+      } else {
+        unbindFirebaseRef('tasks', db.ref('tasks'))
+      }
+    }
+  ),
   setCurrentTaskRef: firebaseAction(({ bindFirebaseRef }, params) => {
     bindFirebaseRef('currentTask', db.ref(`tasks/${params.id}`))
   }),
 
-  addNewTask({ state }, params) {
+  addNewTask({ state, commit }, params) {
     const newTaskValidated = params.newTask.trim()
     if (newTaskValidated) {
       const data = {
@@ -52,11 +108,11 @@ export const actions = {
       }
 
       if (!state.isFireBaseMode) {
-        state.tasks.push(data)
+        commit('addNewTask', { data })
       }
     }
   },
-  completeTask({ state }, params) {
+  completeTask({ state, commit }, params) {
     if (state.isFireBaseMode) {
       db.ref(`tasks/${params.task.id}`).update({
         isCompleted: !params.task.isCompleted,
@@ -64,49 +120,37 @@ export const actions = {
     }
 
     if (!state.isFireBaseMode) {
-      const index = state.tasks.findIndex(
-        (taskItem) => taskItem.id === params.task.id
-      )
-      state.tasks[index].isCompleted = !state.tasks[index].isCompleted
+      commit('completeTask', params)
     }
   },
-  pinTask({ state }, params) {
+  pinTask({ state, commit }, params) {
     if (state.isFireBaseMode) {
       db.ref(`tasks/${params.task.id}`).update({ isPin: !params.task.isPin })
     }
 
     if (!state.isFireBaseMode) {
-      const index = state.tasks.findIndex(
-        (taskItem) => taskItem.id === params.task.id
-      )
-      state.tasks[index].isPin = !state.tasks[index].isPin
+      commit('pinTask', params)
     }
   },
-  deleteTask({ state }, params) {
+  deleteTask({ state, commit }, params) {
     if (state.isFireBaseMode) {
       db.ref(`tasks/${params.task.id}`).remove()
     }
 
     if (!state.isFireBaseMode) {
-      const index = state.tasks.findIndex(
-        (taskItem) => taskItem.id === params.task.id
-      )
-      state.tasks.splice(index, 1)
+      commit('deleteTask', params)
     }
   },
-  updateTask({ state }, params) {
+  updateTask({ state, commit }, params) {
     if (state.isFireBaseMode) {
       db.ref(`tasks/${params.task.id}`).update({ content: params.newContent })
     }
 
     if (!state.isFireBaseMode) {
-      const index = state.tasks.findIndex(
-        (taskItem) => taskItem.id === params.task.id
-      )
-      state.tasks[index].content = params.newContent
+      commit('updateTask', params)
     }
   },
-  completeAllTasks({ state }) {
+  completeAllTasks({ state, commit }) {
     if (state.isFireBaseMode) {
       state.tasks.forEach((task) => {
         !task.isCompleted &&
@@ -115,10 +159,10 @@ export const actions = {
     }
 
     if (!state.isFireBaseMode) {
-      state.tasks.forEach((task) => (task.isCompleted = true))
+      commit('completeAllTasks')
     }
   },
-  clearCompletedTasks({ state }) {
+  clearCompletedTasks({ state, commit }) {
     if (state.isFireBaseMode) {
       const updateData = {}
       state.tasks.forEach((task) => {
@@ -131,18 +175,16 @@ export const actions = {
     }
 
     if (!state.isFireBaseMode) {
-      state.tasks = state.tasks.filter((task) => !task.isCompleted)
+      commit('clearCompletedTasks')
     }
   },
-  loadDataFromLocalStorage(state) {
-    try {
-      const tasks = localStorage.getItem('tasks')
-      state.tasks = JSON.parse(tasks)
-    } catch (e) {
-      localStorage.removeItem('tasks')
-    }
+  setFirebaseMode({ commit }, params) {
+    commit('setFirebaseMode', { ...params })
   },
-  saveDataToLocalStorage(state) {
+  loadDataFromLocalStorage({ commit }) {
+    commit('loadDataFromLocalStorage')
+  },
+  saveDataToLocalStorage({ state }) {
     const parsedTasks = JSON.stringify(state.tasks)
     localStorage.setItem('tasks', parsedTasks)
   },

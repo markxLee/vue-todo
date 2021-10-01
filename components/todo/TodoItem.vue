@@ -1,7 +1,7 @@
 <template>
   <v-list-item
     class="elevation-2 rounded todo-item"
-    @click="$router.push(`/todo/${task.id}`)"
+    @click="goToItemPage"
     @dblclick="editTask()"
   >
     <!-- Complete todo -->
@@ -76,6 +76,11 @@ export default {
       editedContent: '',
     }
   },
+  computed: {
+    isFireBaseMode() {
+      return this.$store.getters['todo/getIsFireBaseMode']
+    },
+  },
   methods: {
     completeTask(event) {
       event.stopPropagation()
@@ -103,6 +108,13 @@ export default {
     cancelEdit() {
       this.isEditing = false
       this.editedContent = ''
+    },
+    goToItemPage() {
+      if (this.isFireBaseMode) {
+        this.$router.push(`/todoRTDB/${this.task.id}`)
+      } else {
+        this.$router.push(`/todoLocalStorage/${this.task.id}`)
+      }
     },
   },
 }
