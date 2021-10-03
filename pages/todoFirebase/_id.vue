@@ -30,11 +30,11 @@ export default {
   },
   computed: {
     currentTask() {
-      return this.$store.getters['todo/getCurrentTask']
+      return this.$store.getters['todoFirebase/getCurrentTask']
     },
   },
   created() {
-    this.$store.dispatch('todo/setCurrentTaskRef', {
+    this.$store.dispatch('todoFirebase/setCurrentTaskRef', {
       id: this.$route.params.id,
       isBinding: true,
     })

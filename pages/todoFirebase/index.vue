@@ -16,13 +16,17 @@
 
     <!-- Storage mode -->
     <div class="d-flex justify-end">
-      <v-radio-group v-model="isFireBaseMode" row readonly>
+      <v-radio-group v-model="storageMode" row readonly>
         <v-radio
           label="Local Storage"
-          :value="false"
-          @click="$router.push('todoLocalStorage')"
+          :value="STORAGE_MODE.LOCAL_STORAGE"
+          @click="changeStorageMode(STORAGE_MODE.LOCAL_STORAGE)"
         ></v-radio>
-        <v-radio label="Realtime Database" :value="true"></v-radio>
+        <v-radio
+          label="Realtime Database"
+          :value="STORAGE_MODE.FIREBASE"
+          @click="changeStorageMode(STORAGE_MODE.FIREBASE)"
+        ></v-radio>
       </v-radio-group>
     </div>
 
@@ -57,6 +61,7 @@
 </template>
 
 <script>
+import { TODO } from '~/constants/todo.js'
 import TodoInput from '~/components/todo/TodoInput.vue'
 import TodoControl from '~/components/todo/TodoControl.vue'
 import GroupItem from '~/components/common/GroupItem.vue'
@@ -70,52 +75,53 @@ export default {
     TodoItem,
   },
   data() {
-    return {
-      storageMode: '0',
-    }
+    return {}
   },
   head: {
     title: 'Todo',
   },
   computed: {
-    tasks() {
-      return this.$store.getters['todo/getTasks']
+    STORAGE_MODE() {
+      return TODO.STORAGE_MODE
+    },
+    storageMode() {
+      return this.$store.getters['todoController/getStorageMode']
     },
     taskGroups() {
       return [
         {
           groupHeader: 'Important tasks',
-          taskList: this.$store.getters['todo/getImportantTasks'] || [],
+          taskList: this.$store.getters['todoFirebase/getImportantTasks'] || [],
         },
         {
           groupHeader: 'Current tasks',
-          taskList: this.$store.getters['todo/getCurrentTasks'] || [],
+          taskList: this.$store.getters['todoFirebase/getCurrentTasks'] || [],
         },
         {
           groupHeader: 'Completed tasks',
-          taskList: this.$store.getters['todo/getCompletedTasks'] || [],
+          taskList: this.$store.getters['todoFirebase/getCompletedTasks'] || [],
         },
       ]
     },
-    STORAGE_MODE() {
-      return {
-        LOCAL_STORAGE: '0',
-        REALTIME_DATABASE: '1',
-      }
-    },
-    isFireBaseMode() {
-      return this.$store.getters['todo/getIsFireBaseMode']
-    },
   },
-  beforeMount() {
-    this.initialSettingForRTDB()
+  created() {
+    this.$store.dispatch('todoFirebase/setTasksRef', { isBinding: true })
   },
   methods: {
-    initialSettingForRTDB() {
-      this.$store.dispatch('todo/setFirebaseMode', {
-        isFireBaseMode: true,
-      })
-      this.$store.dispatch('todo/setTasksRef', { isBinding: true })
+    changeStorageMode(newMode) {
+      if (newMode !== this.storageMode) {
+        this.$store.dispatch('todoController/setStorageMode', {
+          storageMode: newMode,
+        })
+
+        if (newMode === this.STORAGE_MODE.LOCAL_STORAGE) {
+          this.$router.push('todoLocalStorage')
+        }
+
+        if (newMode === this.STORAGE_MODE.FIREBASE) {
+          this.$router.push('todoFirebase')
+        }
+      }
     },
   },
 }

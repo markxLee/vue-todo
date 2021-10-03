@@ -55,6 +55,8 @@
 </template>
 
 <script>
+import { TODO } from '~/constants/todo.js'
+
 export default {
   name: 'TodoItem',
   directives: {
@@ -77,22 +79,37 @@ export default {
     }
   },
   computed: {
-    isFireBaseMode() {
-      return this.$store.getters['todo/getIsFireBaseMode']
+    STORAGE_MODE() {
+      return TODO.STORAGE_MODE
+    },
+    storageMode() {
+      return this.$store.getters['todoController/getStorageMode']
+    },
+    storeName() {
+      if (this.storageMode === this.STORAGE_MODE.LOCAL_STORAGE) {
+        return 'todoLocalStorage'
+      }
+      if (this.storageMode === this.STORAGE_MODE.FIREBASE) {
+        return 'todoFirebase'
+      }
+      return ''
     },
   },
   methods: {
     completeTask(event) {
       event.stopPropagation()
-      this.$store.dispatch('todo/completeTask', { task: this.task })
+      this.$store.dispatch(`${this.storeName}/completeTask`, {
+        task: this.task,
+      })
     },
     pinTask(event) {
       event.stopPropagation()
-      this.$store.dispatch('todo/pinTask', { task: this.task })
+      this.$store.dispatch(`${this.storeName}/pinTask`, { task: this.task })
     },
     deleteTask(event) {
       event.stopPropagation()
-      this.$store.dispatch('todo/deleteTask', { task: this.task })
+      this.$store.dispatch(`${this.storeName}/deleteTask`, { task: this.task })
+      this.$router.push(`/${this.storeName}`)
     },
     editTask() {
       this.isEditing = true
@@ -100,7 +117,7 @@ export default {
     },
     updateTask() {
       this.isEditing = false
-      this.$store.dispatch('todo/updateTask', {
+      this.$store.dispatch(`${this.storeName}/updateTask`, {
         task: this.task,
         newContent: this.editedContent,
       })
@@ -110,11 +127,8 @@ export default {
       this.editedContent = ''
     },
     goToItemPage() {
-      if (this.isFireBaseMode) {
-        this.$router.push(`/todoRTDB/${this.task.id}`)
-      } else {
-        this.$router.push(`/todoLocalStorage/${this.task.id}`)
-      }
+      // Getting bug in localStorage when complet, edit, pin or delete
+      // this.$router.push(`/${this.storeName}/${this.task.id}`)
     },
   },
 }

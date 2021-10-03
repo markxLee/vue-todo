@@ -20,11 +20,28 @@
 </template>
 
 <script>
+import { TODO } from '~/constants/todo.js'
+
 export default {
   name: 'TodoControl',
   computed: {
+    STORAGE_MODE() {
+      return TODO.STORAGE_MODE
+    },
+    storageMode() {
+      return this.$store.getters['todoController/getStorageMode']
+    },
+    storeName() {
+      if (this.storageMode === this.STORAGE_MODE.LOCAL_STORAGE) {
+        return 'todoLocalStorage'
+      }
+      if (this.storageMode === this.STORAGE_MODE.FIREBASE) {
+        return 'todoFirebase'
+      }
+      return ''
+    },
     tasks() {
-      return this.$store.state.todo.tasks
+      return this.$store.getters[`${this.storeName}/getTasks`]
     },
     isDisabledCompleteAllButton() {
       return this.tasks.every((task) => task.isCompleted)
@@ -35,10 +52,10 @@ export default {
   },
   methods: {
     completeAllTasks() {
-      this.$store.dispatch('todo/completeAllTasks')
+      this.$store.dispatch(`${this.storeName}/completeAllTasks`)
     },
     clearCompletedTasks() {
-      this.$store.dispatch('todo/clearCompletedTasks')
+      this.$store.dispatch(`${this.storeName}/clearCompletedTasks`)
     },
   },
 }

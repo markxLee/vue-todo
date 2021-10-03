@@ -30,13 +30,12 @@ export default {
   },
   computed: {
     currentTask() {
-      return this.$store.getters['todo/getCurrentTask']
+      return this.$store.getters['todoLocalStorage/getCurrentTask']
     },
   },
   created() {
-    this.$store.dispatch('todo/setCurrentTaskRef', {
+    this.$store.dispatch('todoLocalStorage/setCurrentTaskRef', {
       id: this.$route.params.id,
-      isBinding: false,
     })
   },
 }
