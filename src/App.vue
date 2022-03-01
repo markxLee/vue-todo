@@ -1,28 +1,47 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Xin chao"/>
+    
+    <TodoList v-bind:todos="todos"></TodoList>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import TodoList from './components/TodoList.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    TodoList,
+  },
+  data() {
+    return {
+        todos: [
+          {
+            id: 1,
+            content: 'Task 1',
+            isChecked: true,
+            isPin: false,
+            todoStatus: 0,
+          },
+          {
+            id: 2,
+            content: 'Task 2',
+            isChecked: false,
+            isPin: false,
+            todoStatus: 0,
+          },
+          {
+            id: 3,
+            content: 'Task 3',
+            isChecked: false,
+            isPin: false,
+            todoStatus: 0,
+          },
+        ]
+    }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 </style>
