@@ -28,6 +28,7 @@
                 </button>
                 <button class="btnPin"
                     v-bind:disabled="disabled"
+                    v-on:click="handlePin" 
                 >   Pin 
                 </button>
             </div>
@@ -59,7 +60,10 @@
             handleDone(){
                 this.$set(this.todo, 'todoStatus', 2);
             },
-            changeCheck() {
+            handlePin(){
+                this.$emit('handlePin', this.todo.id);
+            },
+            changeCheck(){
                 this.$set(this.todo, 'isChecked', !this.todo.isChecked);
             }
         },

@@ -26,7 +26,7 @@ export default {
                 id: +this.todoListLenght + 1,
                 content: this.inputText,
                 isChecked: false,
-                isPin: false,
+                pinNumber: 0,
                 todoStatus: 1,
             }
             this.$emit('handleAdd', data);
