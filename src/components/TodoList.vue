@@ -1,34 +1,43 @@
 <template>
-    <div id="wrapper">
-        <div name="addTask">
-            <input type="text" id="inputContent">
-            <button class="btnAdd">Add</button>
-        </div>
-        <div class="todo-list" v-for="todo in todos" :key="todo.id">
-            <div class="todo">
-                <input type="checkbox" name="chkCheckTodo">
-                <div name="contentTxt">{{todo.content}}</div>
-                <div class="action" v-if="todo.isChecked">
-                    <button class="btnDelete">Remove</button>
-                    <button class="btnDone">Done</button> 
-                    <button class="btnPin">Pin </button> 
-                </div>
-            </div>
-        </div>
+    <div id="TodoListWrapper">
+        <TodoItem 
+            v-for="(todo,index) in todos" v-bind:key="index"
+            v-bind:todo="todo" 
+            v-on:handleDelete="handleDelete"
+        />
     </div>
 </template>
 
 <script>
+import TodoItem from './TodoItem.vue'
 
 export default ({
-    props: ['todos'],
+    name: 'TodoList',
+    props: {
+        todos: {
+            type: Array,
+            default: null,
+        }
+    },
+    data() {
+        return {
+        }
+    },
+    components: {
+        TodoItem,
+    },
+    methods: {
+        handleDelete(deleteID){
+            this.$emit('handleDelete', deleteID);
+        }
+    },
+    computed: {
+        pinTask() {
+            return 1;
+        }
+    }
 })
 </script>
 
 <style scope>
-    .todo {
-        display: flex;
-        height: 30px;
-        margin-top: 5px;
-    }
 </style>
