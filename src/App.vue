@@ -5,7 +5,7 @@
       v-bind:todoListLenght="todoLength"
     />
     <TodoList 
-      v-bind:todos="todos" 
+      v-bind:todos="sortPinList"
       v-on:handleDelete="handleDelete"
       v-on:handlePin="handlePin"
     />
@@ -31,7 +31,8 @@ export default {
             content: 'Task 1',
             isChecked: true,
             pinNumber: 0,
-            todoStatus: 1,//remove: 0, todo: 1, done: 2
+            todoStatus: 1,//todo: 1, done: 2
+            index: 0
           },
           {
             id: 2,
@@ -39,6 +40,7 @@ export default {
             isChecked: true,
             pinNumber: 0,
             todoStatus: 1,
+            index: 1
           },
           {
             id: 3,
@@ -46,6 +48,7 @@ export default {
             isChecked: false,
             pinNumber: 0,
             todoStatus: 1,
+            index: 2
           },
           {
             id: 4,
@@ -53,6 +56,7 @@ export default {
             isChecked: true,
             pinNumber: 0,
             todoStatus: 1,
+            index: 3
           },
           {
             id: 5,
@@ -60,6 +64,7 @@ export default {
             isChecked: true,
             pinNumber: 0,
             todoStatus: 1,
+            index: 4
           },
           {
             id: 6,
@@ -67,45 +72,55 @@ export default {
             isChecked: true,
             pinNumber: 0,
             todoStatus: 1,
+            index: 5
           }
         ]
     }
   },
   computed: {
     todoLength() {
-      return this.todos.id;
-    }
+      return this.todos.length;
+    },
+    sortPinList(){
+      return this.sortByPinNumber();
+    },
   },
   methods: {
-    handleDelete(deleteID) {
-      this.todos = this.todos.filter(todo => todo.id !== deleteID);
+    handleDelete(index) {
+      this.todos.splice(index, 1);
     },
-    handlePin(id) {
-      const todo = this.todos.filter(todo => todo.id === id)[0];
-      
-      if(this.pinNumber === 0 ){
-        todo.pinNumber = this.decreaseNumber;
-        this.decreaseNumber -= 1;
-      } else {
-        if(todo.pinNumber === 0 && (todo.pinNumber < this.decreaseNumber)){
+    handlePin(todoIndex) {
+      const todos = [...this.todos];
+
+      const todo = todos.find((todo, index) => index === todoIndex);
+      const isNotPinned = !todo.pinNumber ? true : false;
+
+      if(isNotPinned) {
+        if(this.pinNumber === 0 ){
           todo.pinNumber = this.decreaseNumber;
           this.decreaseNumber -= 1;
+        } else {
+          if(todo.pinNumber === 0 && (todo.pinNumber < this.decreaseNumber)){
+            todo.pinNumber = this.decreaseNumber;
+            this.decreaseNumber -= 1;
+          }
         }
+        this.todos = todos;
+      } else {
+        todo.pinNumber = 0;
+        this.todos = this.sortByIndex(todos);
       }
-
-      console.log(todo.content);
-      console.log("todo.pinNumber: ", todo.pinNumber);
-      console.log("this.increaseNumber: ", this.decreaseNumber);
-
-      this.todos.sort(function(a,b){
-        if(a.pinNumber < b.pinNumber){
-          return 1;
-        }
-        if(a.pinNumber > b.pinNumber){
-          return -1;
-        }
-        return 0;
-      })
+      
+    },
+    sortByPinNumber(){
+      return this.todos.sort(function(a,b){
+          return b.pinNumber - a.pinNumber;
+      });
+    },
+    sortByIndex(todos){
+      return todos.sort(function(a,b){
+          return a.index - b.index;
+      });
     },
     handleAdd(data){
       this.todos = [...this.todos, data];

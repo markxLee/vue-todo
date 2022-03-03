@@ -29,6 +29,7 @@ export default {
                 pinNumber: 0,
                 todoStatus: 1,
             }
+            console.log(data);
             this.$emit('handleAdd', data);
         }
     }

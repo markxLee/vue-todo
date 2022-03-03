@@ -29,7 +29,7 @@
                 <button class="btnPin"
                     v-bind:disabled="disabled"
                     v-on:click="handlePin" 
-                >   Pin 
+                >   {{!todo.pinNumber ? "Pin" : "Unpin"}} 
                 </button>
             </div>
         </div>
@@ -48,20 +48,20 @@
             todo: {
                 type: Object,
                 default: null,
-            }
+            },
+            index: Number
         },
         components: {
         },
         methods: {
             handleDelete(){
-                const deleteID = this.todo.id
-                this.$emit('handleDelete', deleteID);
+                this.$emit('handleDelete', this.index);
             },
             handleDone(){
                 this.$set(this.todo, 'todoStatus', 2);
             },
             handlePin(){
-                this.$emit('handlePin', this.todo.id);
+                this.$emit('handlePin', this.index);
             },
             changeCheck(){
                 this.$set(this.todo, 'isChecked', !this.todo.isChecked);
