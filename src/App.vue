@@ -1,18 +1,28 @@
 <template>
-  <div id="app">
-    <InputItem
-      v-on:handleAdd="handleAdd"
-      v-bind:todoListLenght="todoLength"
-    />
-    <TodoList 
-      v-bind:todos="sortPinList"
-      v-on:handleDelete="handleDelete"
-      v-on:handlePin="handlePin"
-    />
-  </div>
+  <v-app class="d-flex justify-content">
+    <v-container>
+      <v-card>
+        <v-card-title class="display-1">TODO LIST</v-card-title>
+        <v-card-text>
+          <input-item
+            v-on:handleAdd="handleAdd"
+            v-bind:todoListLenght="todoLength"
+          />
+          <todo-list 
+            v-bind:todos="sortPinList"
+            v-on:handleDelete="handleDelete"
+            v-on:handleDone="handleDone"
+            v-on:handlePin="handlePin"
+          />
+        </v-card-text>
+      </v-card>
+    </v-container>
+  </v-app>
 </template>
 
 <script>
+const TODO_LOCAL_STORAGE = 'todo-local-storage-data';
+
 import InputItem from './components/InputItem.vue'
 import TodoList from './components/TodoList.vue'
 
@@ -22,59 +32,13 @@ export default {
     TodoList,
     InputItem,
   },
+  created() {
+    this.todos = JSON.parse(localStorage.getItem(TODO_LOCAL_STORAGE) || '[]');
+  },
   data() {
     return {
         decreaseNumber: 6,
-        todos: [
-          {
-            id: 1,
-            content: 'Task 1',
-            isChecked: true,
-            pinNumber: 0,
-            todoStatus: 1,//todo: 1, done: 2
-            index: 0
-          },
-          {
-            id: 2,
-            content: 'Task 2',
-            isChecked: true,
-            pinNumber: 0,
-            todoStatus: 1,
-            index: 1
-          },
-          {
-            id: 3,
-            content: 'Task 3',
-            isChecked: false,
-            pinNumber: 0,
-            todoStatus: 1,
-            index: 2
-          },
-          {
-            id: 4,
-            content: 'Task 4',
-            isChecked: true,
-            pinNumber: 0,
-            todoStatus: 1,
-            index: 3
-          },
-          {
-            id: 5,
-            content: 'Task 5',
-            isChecked: true,
-            pinNumber: 0,
-            todoStatus: 1,
-            index: 4
-          },
-          {
-            id: 6,
-            content: 'Task 6',
-            isChecked: true,
-            pinNumber: 0,
-            todoStatus: 1,
-            index: 5
-          }
-        ]
+        todos: []
     }
   },
   computed: {
@@ -88,6 +52,7 @@ export default {
   methods: {
     handleDelete(index) {
       this.todos.splice(index, 1);
+      localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
     },
     handlePin(todoIndex) {
       const todos = [...this.todos];
@@ -106,11 +71,13 @@ export default {
           }
         }
         this.todos = todos;
+        localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
       } else {
         todo.pinNumber = 0;
+        this.decreaseNumber += 1;
         this.todos = this.sortByIndex(todos);
+        localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
       }
-      
     },
     sortByPinNumber(){
       return this.todos.sort(function(a,b){
@@ -124,6 +91,15 @@ export default {
     },
     handleAdd(data){
       this.todos = [...this.todos, data];
+      localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
+    },
+    handleDone(todoIndex){
+      console.log(todoIndex);
+      // this.todos = this.todos.forEach(({index}) => {
+      //   if(index === todoIndex) {
+      //     this.todos[index].todoStatus = '2';
+      //   }
+      // });
     }
   }
 }

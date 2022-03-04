@@ -1,39 +1,53 @@
 <template>
-    <div class="TodoWrapper">
-        <div class="todo">
-            <input
-                type="checkbox" 
-                name="chkCheckTodo"
-                v-on:change="changeCheck"
-                v-model="isChecked"
-                v-bind:disabled="disabled"
-            >
-            <span name="contentTxt" 
-                v-bind:class="disableClass"
-            >
-                {{todo.content}}
-            </span>
-            <div class="action" v-if="todo.isChecked">
-                <button class="btnDelete" 
+    <v-container class="d-flex justify-content align-center pa-0">
+        <v-row class="py-1">
+            <v-col md="9">
+                <v-row class="d-flex align-center">
+                    <v-checkbox
+                        v-on:change="changeCheck"
+                        v-model="isChecked"
+                        v-bind:disabled="disabled"
+                    >
+                    </v-checkbox>
+                    <span name="contentTxt" 
+                        class="overflow-x-hidden"
+                        v-bind:class="disableClass"
+                    >
+                        {{todo.content}}
+                    </span>
+                </v-row>
+            </v-col>
+            <v-col md="3" class="action d-flex align-center justify-end px-0" v-if="todo.isChecked">
+                <v-btn class="btnDelete" 
                     v-on:click="handleDelete" 
                     v-bind:disabled="disabled"
+                    color="red darken-1"
                 >
-                    Remove
-                </button>
-                <button class="btnDone"
+                    <v-icon class="white--text">
+                    mdi-minus
+                    </v-icon>
+                </v-btn>
+                <v-btn class="btnDone"
                     v-bind:disabled="disabled"
                     v-on:click="handleDone" 
+                    color="green"
                 >
-                    Done
-                </button>
-                <button class="btnPin"
+                    <v-icon class="white--text">
+                    mdi-check
+                    </v-icon>
+                </v-btn>
+                <v-btn class="btnPin"
                     v-bind:disabled="disabled"
                     v-on:click="handlePin" 
-                >   {{!todo.pinNumber ? "Pin" : "Unpin"}} 
-                </button>
-            </div>
-        </div>
-    </div>
+                    color="blue"
+                >   
+                    <v-icon class="white--text">
+                {{todo.pinNumber ? "mdi-pin-off" : "mdi-pin"}} 
+                    </v-icon>
+                </v-btn>
+            </v-col>
+        </v-row>
+    </v-container>
 </template>
 
 <script>
@@ -58,7 +72,7 @@
                 this.$emit('handleDelete', this.index);
             },
             handleDone(){
-                this.$set(this.todo, 'todoStatus', 2);
+                this.$emit('handleDone', this.index);
             },
             handlePin(){
                 this.$emit('handlePin', this.index);
@@ -73,7 +87,7 @@
             },
             disableClass() {
                 return {
-                    disable: this.todo.todoStatus === 2
+                    'text-decoration-line-through': this.todo.todoStatus === 2
                 }
             }
         }
@@ -81,10 +95,4 @@
 </script>
 
 <style scope>
-    .todo {
-        display: flex;
-    }
-    .todo .disable {
-        text-decoration: line-through;
-    }
 </style>

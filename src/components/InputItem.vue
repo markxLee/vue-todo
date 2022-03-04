@@ -1,11 +1,19 @@
 <template>
-    <div class="addTask">
-        <input 
-            type="text" 
-            id="inputContent" 
-            v-model="inputText"
-        >
-        <button class="btnAdd" v-on:click="handleAdd">Add</button>
+    <div class="input-Item">
+            <v-text-field
+                outlined
+                clearable
+                ref="name"
+                hide-details="auto"
+                label="Task title"
+                placeholder="Enter task title"
+                v-bind:rules="rules"
+                append-icon="mdi-plus"
+                v-on:click:append="handleAdd"
+                v-on:keyup.enter="handleAdd"
+                v-model="inputText"
+            >
+            </v-text-field>
     </div>
 </template>
 
@@ -17,20 +25,29 @@ export default {
     },
     data() {
         return {
-            inputText: ''
+            inputText: '',
+            rules: []
         }
     },
     methods: {
+        setRules() {
+            this.rules = [...this.rules, value => !!value || 'This field is required'];
+        },
         handleAdd() {
-            const data = {
-                id: +this.todoListLenght + 1,
-                content: this.inputText,
-                isChecked: false,
-                pinNumber: 0,
-                todoStatus: 1,
+            this.setRules();
+            if(this.$refs.name.validate(true) && this.inputText){
+                const data = {
+                    id: +this.todoListLenght + 1,
+                    content: this.inputText,
+                    isChecked: false,
+                    pinNumber: 0,
+                    todoStatus: 1,
+                    index: +this.todoListLenght + 1,
+                }
+                this.$emit('handleAdd', data);
+                this.inputText = '';
+                this.rules = [];
             }
-            console.log(data);
-            this.$emit('handleAdd', data);
         }
     }
 }

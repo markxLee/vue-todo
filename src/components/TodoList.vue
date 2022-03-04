@@ -1,13 +1,14 @@
 <template>
-    <div id="TodoListWrapper">
-        <TodoItem 
+    <v-container>
+        <todo-item 
             v-for="(todo, index)  in todos" v-bind:key="todo.id"
             v-bind:todo="todo"
             v-bind:index="index"
             v-on:handleDelete="handleDelete"
+            v-on:handleDone="handleDone"
             v-on:handlePin="handlePin"
         />
-    </div>
+    </v-container>
 </template>
 
 <script>
@@ -32,8 +33,11 @@ export default ({
         handleDelete(index){
             this.$emit('handleDelete', index);
         },
-        handlePin(todoIndex){
-            this.$emit('handlePin', todoIndex);
+        handleDone(index){
+            this.$emit('handleDone', index);
+        },
+        handlePin(index){
+            this.$emit('handlePin', index);
         }
     },
     computed: {
