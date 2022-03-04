@@ -2,20 +2,20 @@
     <v-container class="d-flex justify-content align-center pa-0">
         <v-row class="py-1">
             <v-col md="9">
-                <v-row class="d-flex align-center">
+                <div class="d-flex align-center flex-nowrap">
                     <v-checkbox
-                        v-on:change="changeCheck"
+                        v-on:change="handleCheck"
                         v-model="isChecked"
                         v-bind:disabled="disabled"
                     >
                     </v-checkbox>
-                    <span name="contentTxt" 
-                        class="overflow-x-hidden"
+                    <div
+                        name="contentTxt" 
                         v-bind:class="disableClass"
                     >
                         {{todo.content}}
-                    </span>
-                </v-row>
+                    </div>
+                </div>
             </v-col>
             <v-col md="3" class="action d-flex align-center justify-end px-0" v-if="todo.isChecked">
                 <v-btn class="btnDelete" 
@@ -77,8 +77,8 @@
             handlePin(){
                 this.$emit('handlePin', this.index);
             },
-            changeCheck(){
-                this.$set(this.todo, 'isChecked', !this.todo.isChecked);
+            handleCheck(){
+                this.$emit('handleCheck', this.index);
             }
         },
         computed: {

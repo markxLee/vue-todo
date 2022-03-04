@@ -1,9 +1,10 @@
 <template>
     <v-container>
         <todo-item 
-            v-for="(todo, index)  in todos" v-bind:key="todo.id"
+            v-for="(todo, index)  in todos" v-bind:key="todo.id + '' + index"
             v-bind:todo="todo"
             v-bind:index="index"
+            v-on:handleCheck="handleCheck"
             v-on:handleDelete="handleDelete"
             v-on:handleDone="handleDone"
             v-on:handlePin="handlePin"
@@ -30,6 +31,9 @@ export default ({
         TodoItem,
     },
     methods: {
+        handleCheck(index){
+            this.$emit('handleCheck', index);
+        },
         handleDelete(index){
             this.$emit('handleDelete', index);
         },

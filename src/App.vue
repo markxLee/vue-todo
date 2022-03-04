@@ -10,6 +10,7 @@
           />
           <todo-list 
             v-bind:todos="sortPinList"
+            v-on:handleCheck="handleCheck"
             v-on:handleDelete="handleDelete"
             v-on:handleDone="handleDone"
             v-on:handlePin="handlePin"
@@ -94,12 +95,12 @@ export default {
       localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
     },
     handleDone(todoIndex){
-      console.log(todoIndex);
-      // this.todos = this.todos.forEach(({index}) => {
-      //   if(index === todoIndex) {
-      //     this.todos[index].todoStatus = '2';
-      //   }
-      // });
+      this.todos[todoIndex].todoStatus = 2;
+      localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
+    },
+    handleCheck(todoIndex){
+      this.todos[todoIndex].isChecked = !this.todos[todoIndex].isChecked;
+      localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
     }
   }
 }
