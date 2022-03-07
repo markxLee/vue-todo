@@ -26,6 +26,7 @@ const TODO_LOCAL_STORAGE = 'todo-local-storage-data';
 
 import InputItem from './components/InputItem.vue'
 import TodoList from './components/TodoList.vue'
+import db from './firebase';
 
 export default {
   name: 'App',
@@ -34,7 +35,13 @@ export default {
     InputItem,
   },
   created() {
-    this.todos = JSON.parse(localStorage.getItem(TODO_LOCAL_STORAGE) || '[]');
+    // this.todos = JSON.parse(localStorage.getItem(TODO_LOCAL_STORAGE) || '[]');
+    db.collection("todoList").get()
+    .then(docs => {
+      docs.forEach(doc => {
+        this.todos.push(doc.data());
+      })
+    })
   },
   data() {
     return {
@@ -51,14 +58,25 @@ export default {
     },
   },
   methods: {
-    handleDelete(index) {
-      this.todos.splice(index, 1);
-      localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
+    handleDelete(id) {
+      let index = this.todos.findIndex(todo => todo.id === id);
+      //this.todos.splice(index, 1);
+      //localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
+
+      let item = db.collection("todoList").where("id","==",id);
+      item.get().then(data => {
+        return data.docs[0].ref.delete({
+        })
+        .then(() => {
+          this.todos.splice(index, 1);
+        })
+      })
     },
     handlePin(todoIndex) {
       const todos = [...this.todos];
-
       const todo = todos.find((todo, index) => index === todoIndex);
+
+      // const todo = this.todos.find((todo, index) => index === todoIndex);
       const isNotPinned = !todo.pinNumber ? true : false;
 
       if(isNotPinned) {
@@ -73,9 +91,30 @@ export default {
         }
         this.todos = todos;
         localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
+
+        // let item = db.collection("todoList");
+        // item.get().then(data => {
+        //   return data.docs[todoIndex].ref.update({
+        //     pinNumber: todo.pinNumber
+        //   })
+        //   .then(() => {
+        //     this.todos[todoIndex].pinNumber = todo.pinNumber;
+        //   })
+        // })
       } else {
         todo.pinNumber = 0;
         this.decreaseNumber += 1;
+        // let item = db.collection("todoList");
+        // item.get().then(data => {
+        //   return data.docs[todoIndex].ref.update({
+        //     pinNumber: todo.pinNumber
+        //   })
+        //   .then(() => {
+        //     this.todos[todoIndex].pinNumber = todo.pinNumber;
+        //   })
+        // })
+        // this.todos = this.sortByIndex(this.todos);
+
         this.todos = this.sortByIndex(todos);
         localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
       }
@@ -91,16 +130,47 @@ export default {
       });
     },
     handleAdd(data){
-      this.todos = [...this.todos, data];
-      localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
+      // this.todos.push(data);
+      // localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
+
+      db.collection("todoList").add(data)
+      .then(() => {
+        this.todos.push(data);
+      })
+      .catch(e => {
+        console.log(e);
+      })
     },
-    handleDone(todoIndex){
-      this.todos[todoIndex].todoStatus = 2;
-      localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
+    handleDone(id){
+      let index = this.todos.findIndex(todo => todo.id === id);
+      // this.todos[index].todoStatus = 2;
+      // localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
+      
+      let item = db.collection("todoList").where("id","==",id);
+      item.get().then(data => {
+        return data.docs[0].ref.update({
+          todoStatus: 2
+        })
+        .then(() => {
+          this.todos[index].todoStatus = 2;
+        })
+      })
     },
-    handleCheck(todoIndex){
-      this.todos[todoIndex].isChecked = !this.todos[todoIndex].isChecked;
-      localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
+    handleCheck(id){
+      let index = this.todos.findIndex(todo => todo.id === id);
+
+      //this.todos[index].isChecked = !this.todos[index].isChecked;
+      //localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
+
+      let item = db.collection("todoList").where("id","==",id);
+      item.get().then(data => {
+        return data.docs[0].ref.update({
+          isChecked: !data.docs[0].data().isChecked
+        })
+        .then(() => {
+          this.todos[index].isChecked = !data.docs[0].data().isChecked;
+        })
+      })
     }
   }
 }

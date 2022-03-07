@@ -31,17 +31,17 @@ export default ({
         TodoItem,
     },
     methods: {
-        handleCheck(index){
-            this.$emit('handleCheck', index);
+        handleCheck(id){
+            this.$emit('handleCheck', id);
         },
-        handleDelete(index){
-            this.$emit('handleDelete', index);
+        handleDelete(id){
+            this.$emit('handleDelete', id);
         },
-        handleDone(index){
-            this.$emit('handleDone', index);
+        handleDone(id){
+            this.$emit('handleDone', id);
         },
-        handlePin(index){
-            this.$emit('handlePin', index);
+        handlePin(id){
+            this.$emit('handlePin', id);
         }
     },
     computed: {
