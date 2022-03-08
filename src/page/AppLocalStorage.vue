@@ -4,11 +4,10 @@
       <v-card>
         <v-card-title class="display-1">TODO LIST - LOCAL STORAGE</v-card-title>
         <v-card-text>
-          <input-item-local-storage
+          <input-item
             v-on:handleAdd="handleAdd"
-            v-bind:todoListLenght="todoLength"
           />
-          <todo-list-local-storage
+          <todo-list
             v-bind:todos="sortPinList"
             v-on:handleCheck="handleCheck"
             v-on:handleDelete="handleDelete"
@@ -24,14 +23,14 @@
 <script>
 const TODO_LOCAL_STORAGE = 'todo-local-storage-data';
 
-import InputItemLocalStorage from '../components/LocalStorage/InputItemLocalStorage.vue'
-import TodoListLocalStorage from '../components/LocalStorage/TodoListLocalStorage.vue'
+import InputItem from '../components/InputItem.vue'
+import TodoList from '../components/TodoList.vue'
 
 export default {
   name: 'App',
   components: {
-    TodoListLocalStorage,
-    InputItemLocalStorage,
+    TodoList,
+    InputItem,
   },
   created() {
     this.todos = JSON.parse(localStorage.getItem(TODO_LOCAL_STORAGE) || '[]');
@@ -39,13 +38,11 @@ export default {
   data() {
     return {
         decreaseNumber: 0,
+        increaseNunmber: 0,
         todos: []
     }
   },
   computed: {
-    todoLength() {
-      return this.todos.length;
-    },
     sortPinList(){
       return this.sortByPinNumber();
     },
@@ -77,6 +74,7 @@ export default {
         localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
       } else {
         todo.pinNumber = 0;
+        this.todos[index].pinNumber = todo.pinNumber
 
         this.todos = this.sortByIndex(this.todos);
         localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
@@ -100,6 +98,13 @@ export default {
         }
       });
       this.todos = todos;
+
+      this.increaseNunmber++;
+      data = {
+        id: this.increaseNunmber,
+        index: this.increaseNunmber,
+        ...data
+      }
       this.todos.push(data);
       localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
     },

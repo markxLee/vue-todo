@@ -6,7 +6,6 @@
         <v-card-text>
           <input-item
             v-on:handleAdd="handleAdd"
-            v-bind:todoListLenght="todoLength"
           />
           <todo-list 
             v-bind:todos="sortPinList"
@@ -22,8 +21,8 @@
 </template>
 
 <script>
-import InputItem from '../components/FireStore/InputItem.vue'
-import TodoList from '../components/FireStore/TodoList.vue'
+import InputItem from '../components/InputItem.vue'
+import TodoList from '../components/TodoList.vue'
 import db from '../firebase';
 
 export default {
@@ -49,6 +48,7 @@ export default {
   data() {
     return {
         decreaseNumber: 0,
+        increaseNunmber: 0,
         todos: []
     }
   },
@@ -114,6 +114,12 @@ export default {
         }
       });
       this.todos = todos;
+
+      this.increaseNunmber++;
+      data = {
+        index: this.increaseNunmber,
+        ...data
+      }
       
       db.collection("todoList").add(data)
       .then((res) => {

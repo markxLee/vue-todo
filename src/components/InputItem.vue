@@ -37,12 +37,10 @@ export default {
             this.setRules();
             if(this.$refs.name.validate(true) && this.inputText){
                 const data = {
-                    id: +this.todoListLenght + 1,
                     content: this.inputText,
                     isChecked: false,
                     pinNumber: 0,
                     todoStatus: 1,
-                    index: +this.todoListLenght + 1,
                 }
                 this.$emit('handleAdd', data);
                 this.inputText = '';
