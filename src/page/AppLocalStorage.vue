@@ -2,13 +2,13 @@
   <v-app class="d-flex justify-content">
     <v-container>
       <v-card>
-        <v-card-title class="display-1">TODO LIST</v-card-title>
+        <v-card-title class="display-1">TODO LIST - LOCAL STORAGE</v-card-title>
         <v-card-text>
-          <input-item
+          <input-item-local-storage
             v-on:handleAdd="handleAdd"
             v-bind:todoListLenght="todoLength"
           />
-          <todo-list 
+          <todo-list-local-storage
             v-bind:todos="sortPinList"
             v-on:handleCheck="handleCheck"
             v-on:handleDelete="handleDelete"
@@ -24,14 +24,14 @@
 <script>
 const TODO_LOCAL_STORAGE = 'todo-local-storage-data';
 
-import InputItem from '../components/InputItem.vue'
-import TodoList from '../components/TodoList.vue'
+import InputItemLocalStorage from '../components/LocalStorage/InputItemLocalStorage.vue'
+import TodoListLocalStorage from '../components/LocalStorage/TodoListLocalStorage.vue'
 
 export default {
   name: 'App',
   components: {
-    TodoList,
-    InputItem,
+    TodoListLocalStorage,
+    InputItemLocalStorage,
   },
   created() {
     this.todos = JSON.parse(localStorage.getItem(TODO_LOCAL_STORAGE) || '[]');
@@ -57,27 +57,27 @@ export default {
       localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
     },
     handlePin(id) {
-      this.decreaseNumber = this.todoLength;
       let index = this.todos.findIndex(todo => todo.id === id);
       const todo = this.todos[index];
-      const isNotPinned = !todo.pinNumber ? true : false;
 
+      const isNotPinned = !todo.pinNumber ? true : false;
+      this.decreaseNumber = this.todos.length;
       if(isNotPinned) {
-        if(this.pinNumber === 0 ){
+        if(todo.pinNumber === 0 ){
           todo.pinNumber = this.decreaseNumber;
           this.decreaseNumber -= 1;
         } else {
-          if(todo.pinNumber === 0 && (todo.pinNumber < this.decreaseNumber)){
+          if(todo.pinNumber !== 0 && (todo.pinNumber < this.decreaseNumber)){
             todo.pinNumber = this.decreaseNumber;
             this.decreaseNumber -= 1;
           }
         }
+
         this.todos[index].pinNumber = todo.pinNumber;
         localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
       } else {
         todo.pinNumber = 0;
-        this.decreaseNumber += 1;
-        this.todos[index].pinNumber = todo.pinNumber;
+
         this.todos = this.sortByIndex(this.todos);
         localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
       }
@@ -93,6 +93,13 @@ export default {
       });
     },
     handleAdd(data){
+      const todos = [...this.todos]
+      todos.forEach((todo, index) => {
+        if(todo.pinNumber !== 0) {
+          todos[index].pinNumber++;
+        }
+      });
+      this.todos = todos;
       this.todos.push(data);
       localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
     },

@@ -2,7 +2,7 @@
   <v-app class="d-flex justify-content">
     <v-container>
       <v-card>
-        <v-card-title class="display-1">TODO LIST</v-card-title>
+        <v-card-title class="display-1">TODO LIST - FIRE STORE</v-card-title>
         <v-card-text>
           <input-item
             v-on:handleAdd="handleAdd"
@@ -22,8 +22,8 @@
 </template>
 
 <script>
-import InputItem from '../components/InputItem.vue'
-import TodoList from '../components/TodoList.vue'
+import InputItem from '../components/FireStore/InputItem.vue'
+import TodoList from '../components/FireStore/TodoList.vue'
 import db from '../firebase';
 
 export default {
@@ -33,7 +33,7 @@ export default {
     InputItem,
   },
   created() {
-    db.collection("todoList").get()
+    db.collection("todoList").orderBy("index", "asc").get()
     .then(docs => {
       docs.forEach(doc => {
         if(doc.exists){
@@ -68,38 +68,31 @@ export default {
       .then (() => this.todos.splice(index, 1));
     },
     handlePin(id) {
-      this.decreaseNumber = this.todoLength;
       let index = this.todos.findIndex(todo => todo.id === id);
       const todo = this.todos[index];
 
       const isNotPinned = !todo.pinNumber ? true : false;
-
+      this.decreaseNumber = this.todos.length;
       if(isNotPinned) {
-        if(this.pinNumber === 0 ){
+        if(todo.pinNumber === 0 ){
           todo.pinNumber = this.decreaseNumber;
           this.decreaseNumber -= 1;
         } else {
-          if(todo.pinNumber === 0 && (todo.pinNumber < this.decreaseNumber)){
+          if(todo.pinNumber !== 0 && (todo.pinNumber < this.decreaseNumber)){
             todo.pinNumber = this.decreaseNumber;
             this.decreaseNumber -= 1;
           }
         }
-        
+
+        this.todos[index].pinNumber = todo.pinNumber
         let todoRef = db.collection("todoList");
-        todoRef.doc(id).update({
-          pinNumber: todo.pinNumber
-        })
-        .then (() => this.todos[index].pinNumber = todo.pinNumber)
+        todoRef.doc(id).update({pinNumber: todo.pinNumber})
       } else {
         todo.pinNumber = 0;
-        this.decreaseNumber += 1;
 
-        let item = db.collection("todoList").where("id","==",id);
-        item.get().then(data => {
-          return data.docs[0].ref.update({
-            pinNumber: todo.pinNumber
-          })
-        })
+        this.todos[index].pinNumber = todo.pinNumber
+        let todoRef = db.collection("todoList");
+        todoRef.doc(id).update({pinNumber: todo.pinNumber})
         this.todos = this.sortByIndex(this.todos);
       }
     },
@@ -114,6 +107,14 @@ export default {
       });
     },
     handleAdd(data){
+      const todos = [...this.todos]
+      todos.forEach((todo, index) => {
+        if(todo.pinNumber !== 0) {
+          todos[index].pinNumber++;
+        }
+      });
+      this.todos = todos;
+      
       db.collection("todoList").add(data)
       .then((res) => {
         this.todos.push({...data, id: res.id })
