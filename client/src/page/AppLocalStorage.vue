@@ -25,6 +25,7 @@ const TODO_LOCAL_STORAGE = 'todo-local-storage-data';
 
 import InputItem from '../components/InputItem.vue'
 import TodoList from '../components/TodoList.vue'
+import { v4 as uuidv4 } from 'uuid';
 
 export default {
   name: 'App',
@@ -101,7 +102,7 @@ export default {
 
       this.increaseNunmber++;
       data = {
-        id: this.increaseNunmber,
+        id: uuidv4(),
         index: this.increaseNunmber,
         ...data
       }

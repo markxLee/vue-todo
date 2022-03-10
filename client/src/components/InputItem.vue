@@ -12,6 +12,7 @@
                 v-on:click:append="handleAdd"
                 v-on:keyup.enter="handleAdd"
                 v-model="inputText"
+                name="inputText"
             >
             </v-text-field>
     </div>

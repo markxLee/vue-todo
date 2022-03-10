@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import AppFireStore from '../page/AppFireStore.vue'
 import AppLocalStorage from '../page/AppLocalStorage.vue'
+import AppCreate from '../page/AppCreate.vue'
 
 Vue.use(VueRouter)
 
@@ -15,6 +16,11 @@ const routes = [
     path: '/localstorage',
     name: 'localstorage',
     component: AppLocalStorage
+  },
+  {
+    path: '/create',
+    name: 'create',
+    component: AppCreate
   }
 ]
 
