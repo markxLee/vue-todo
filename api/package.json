@@ -1,0 +1,29 @@
+{
+  "name": "vue-todo",
+  "version": "1.0.0",
+  "description": "For the team to learn about vue.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node server.bundle.js",
+    "build": "webpack",
+    "dev": "nodemon ./server.js localhost 3080"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markxLee/vue-todo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/markxLee/vue-todo/issues"
+  },
+  "homepage": "https://github.com/markxLee/vue-todo#readme",
+  "dependencies": {
+    "express": "^4.17.3",
+    "supervisor": "^0.12.0",
+    "http-proxy-middleware": "^1.0.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
