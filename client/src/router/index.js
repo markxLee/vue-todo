@@ -18,8 +18,8 @@ const routes = [
     component: AppLocalStorage
   },
   {
-    path: '/create',
-    name: 'create',
+    path: '/mongodb',
+    name: 'mongodb',
     component: AppCreate
   }
 ]

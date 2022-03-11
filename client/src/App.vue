@@ -3,7 +3,7 @@
     <v-btn class="toggle" color="Dark display-1" v-on:click="switchPage">Switch Page</v-btn>
     <app-fire-store router-link :key="$route.fullPath" v-bind:to="switchPage" v-if="direct === '/firestore'"></app-fire-store>
     <app-local-storage router-link :key="$route.fullPath" v-bind:to="switchPage" v-if="direct === '/localstorage'">></app-local-storage>
-    <app-create router-link :key="$route.fullPath" v-bind:to="switchPage" v-if="direct === '/create'">></app-create>
+    <app-create router-link :key="$route.fullPath" v-bind:to="switchPage" v-if="direct === '/mongodb'">></app-create>
   </v-app>
 </template>
 

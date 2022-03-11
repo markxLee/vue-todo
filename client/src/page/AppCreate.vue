@@ -1,34 +1,30 @@
 <template>
   <v-app class="d-flex justify-content">
-    <v-form method="POST">
-      <v-container>
-        <v-card>
-          <v-card-title class="display-1">TODO LIST - CREATE</v-card-title>
-          <v-card-text>
-            <input-item
-              v-on:handleAdd="handleAdd"
-            />
-            <todo-list
-              v-bind:todos="sortPinList"
-              v-on:handleCheck="handleCheck"
-              v-on:handleDelete="handleDelete"
-              v-on:handleDone="handleDone"
-              v-on:handlePin="handlePin"
-            />
-          </v-card-text>
-        </v-card>
-      </v-container>
-    </v-form>
+    <v-container>
+      <v-card>
+        <v-card-title class="display-1">TODO LIST - CREATE</v-card-title>
+        <v-card-text>
+          <input-item
+            v-on:handleAdd="handleAdd"
+          />
+          <todo-list
+            v-bind:todos="sortPinList"
+            v-on:handleCheck="handleCheck"
+            v-on:handleDelete="handleDelete"
+            v-on:handleDone="handleDone"
+            v-on:handlePin="handlePin"
+          />
+        </v-card-text>
+      </v-card>
+    </v-container>
   </v-app>
 </template>
 
 <script>
-const TODO_LOCAL_STORAGE = 'todo-local-storage-data';
 
 import InputItem from '../components/InputItem.vue'
 import TodoList from '../components/TodoList.vue'
-import Create from '../services/Create'
-import { v4 as uuidv4 } from 'uuid';
+import Todo from '../services/Todo'
 
 export default {
   name: 'App',
@@ -36,8 +32,10 @@ export default {
     TodoList,
     InputItem,
   },
-  created() {
-    this.todos = JSON.parse(localStorage.getItem(TODO_LOCAL_STORAGE) || '[]');
+  async created() {
+    this.todos = (await Todo.index()).data || '[]';
+  },
+  async mounted () {
   },
   data() {
     return {
@@ -52,10 +50,11 @@ export default {
     },
   },
   methods: {
-    handleDelete(id) {
+    async handleDelete(id) {
       let index = this.todos.findIndex(todo => todo.id === id);
+      console.log(id);
+      await Todo.delete(id);
       this.todos.splice(index, 1);
-      localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
     },
     handlePin(id) {
       let index = this.todos.findIndex(todo => todo.id === id);
@@ -75,13 +74,11 @@ export default {
         }
 
         this.todos[index].pinNumber = todo.pinNumber;
-        localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
       } else {
         todo.pinNumber = 0;
         this.todos[index].pinNumber = todo.pinNumber
 
         this.todos = this.sortByIndex(this.todos);
-        localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
       }
     },
     sortByPinNumber(){
@@ -94,24 +91,22 @@ export default {
           return a.index - b.index;
       });
     },
-    handleAdd(data){
+    async handleAdd(data){
       data = {
-        id: uuidv4(),
         index: this.increaseNunmber,
         ...data
       }
-      Create.create({data})
+      await Todo.create(data);
+      this.todos.push(data);
     },
-    handleDone(id){
+    async handleDone(id){
       let index = this.todos.findIndex(todo => todo.id === id);
+      await Todo.done({id});
       this.todos[index].todoStatus = 2;
-      localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
-      
     },
     handleCheck(id){
       let index = this.todos.findIndex(todo => todo.id === id);
       this.todos[index].isChecked = !this.todos[index].isChecked;
-      localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
     }
   }
 }

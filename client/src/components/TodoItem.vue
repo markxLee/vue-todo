@@ -69,16 +69,16 @@
         },
         methods: {
             handleDelete(){
-                this.$emit('handleDelete', this.todo.id);
+                this.$emit('handleDelete', this.todo._id);
             },
             handleDone(){
-                this.$emit('handleDone', this.todo.id);
+                this.$emit('handleDone', this.todo._id);
             },
             handlePin(){
-                this.$emit('handlePin', this.todo.id);
+                this.$emit('handlePin', this.todo._id);
             },
             handleCheck(){
-                this.$emit('handleCheck', this.todo.id);
+                this.$emit('handleCheck', this.todo._id);
             }
         },
         computed: {
