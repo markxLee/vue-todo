@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import ListTodo from './components/ListTodo';
+import ListTodo from './components/TaskDashboard';
 
 export default {
   name: 'App',

@@ -1,7 +1,5 @@
 <template>
-  <v-container>
-    <createTask></createTask>
-    <v-list
+  <v-list
       flat
       subheader
       three-line
@@ -9,7 +7,6 @@
       <v-subheader bold-text>List Todo</v-subheader>
 
       <v-list-item-group
-        v-model="settings"
         multiple
         active-class=""
       >
@@ -20,14 +17,14 @@
             </v-list-item-action>
 
             <v-list-item-content>
-              <v-list-item-title :class="task.status == 1 ? 'text-decoration-line-through' : ''">{{ task.name }}</v-list-item-title>
+              <v-list-item-title :class="task.status == 1 ? 'text-decoration-line-through' : ''"><v-icon left small v-if="task.pin != 0" color="#eda489">mdi-pin-outline</v-icon>{{ task.name }}</v-list-item-title>
               <v-list-item-subtitle :class="task.status == 1 ? 'text-decoration-line-through' : ''">{{ task.content }}</v-list-item-subtitle>
             </v-list-item-content>
         
             <v-btn v-if="active"
               tile
-              color="error"
-              @click=removeTask(task.id)
+              color="#d15555"
+              @click.native=removeTask(task.id)
             >
               <v-icon left>
                 mdi-delete
@@ -36,68 +33,54 @@
             </v-btn>
             <v-btn v-if="active"
               tile
-              color="success"
+              color="#a1d76f"
               @click=doneTask(task.id)
+              class="ml-1"
             >
               <v-icon left>
                 mdi-check
               </v-icon>
               Done
             </v-btn>
+            <v-btn v-if="active && task.pin==0"
+              tile
+              color="#e8fd96"
+              @click=pinTask(task.id)
+              class="ml-1"
+            >
+              <v-icon left>
+                mdi-pin
+              </v-icon>
+              Pin
+            </v-btn>
+            <v-btn v-if="active && task.pin!=0"
+              tile
+              color="#eda489"
+              @click=unpinTask(task.id)
+              class="ml-1"
+            >
+              <v-icon left>
+                mdi-pin-off
+              </v-icon>
+              Unpin
+            </v-btn>
           </template>
         </v-list-item>
 
       </v-list-item-group>
     </v-list>
-  </v-container>
 </template>
-
 <script>
-  import { getAllTasks, createUser } from '../services/TaskService'
- import createTask from './CreateTask.vue'
-
   export default {
-    name: 'ListTodo',
-    components: {
-      createTask
-    },
-
+    props: ['tasks'],
     data: () => ({
-      tasks: [],
-      numberOfTasks: 0,
     }),
+
     methods: {
-      getTasks() {
-        getAllTasks().then(response => {
-          console.log(response)
-          this.tasks = response
-          this.numberOfTasks = this.tasks.length
-        })
-      },
-      userCreate(data) {
-        console.log('data:::', data)
-        createUser(data).then(response => {
-          console.log(response);
-          this.getAllTasks();
-        });
-      },
-
-      doneTask(id) {
-        this.tasks.forEach(v => {
-          if(v.id == id) {
-            v.status = 1
-          }
-        })
-        console.log(this.tasks)
-      },
-
-      removeTask(id) {
-        this.tasks = this.tasks.filter(v => v.id != id)
-      }
+        doneTask (id) { this.$emit("doneTask", id) },
+        removeTask (id) { this.$emit("removeTask", id)},
+        pinTask (id) { this.$emit("pinTask", id)},
+        unpinTask (id) { this.$emit("unpinTask", id)},
     },
-    mounted () {
-      this.getTasks();
-    }
   }
-  
 </script>
