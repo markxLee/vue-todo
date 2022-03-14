@@ -37,13 +37,15 @@ export default {
       docs.forEach(doc => {
         if(doc.exists){
           this.todos.push({
-            id: doc.id,
+            _id: doc.id,
             ...doc.data()
           })
         }
       })
-    })
-    ;
+    });
+  },
+  async mounted () {
+    this.decreaseNumber = this.todos.length;
   },
   data() {
     return {
@@ -62,17 +64,17 @@ export default {
   },
   methods: {
     handleDelete(id) {
-      let index = this.todos.findIndex(todo => todo.id === id);
+      let index = this.todos.findIndex(todo => todo._id === id);
       let todoRef = db.collection("todoList");
       todoRef.doc(id).delete()
       .then (() => this.todos.splice(index, 1));
     },
     handlePin(id) {
-      let index = this.todos.findIndex(todo => todo.id === id);
+      let index = this.todos.findIndex(todo => todo._id === id);
       const todo = this.todos[index];
 
       const isNotPinned = !todo.pinNumber ? true : false;
-      this.decreaseNumber = this.todos.length;
+      this.decreaseNumber = this.decreaseNumber && this.todos.length;
       if(isNotPinned) {
         if(todo.pinNumber === 0 ){
           todo.pinNumber = this.decreaseNumber;
@@ -83,14 +85,11 @@ export default {
             this.decreaseNumber -= 1;
           }
         }
-
-        this.todos[index].pinNumber = todo.pinNumber
         let todoRef = db.collection("todoList");
         todoRef.doc(id).update({pinNumber: todo.pinNumber})
       } else {
         todo.pinNumber = 0;
-
-        this.todos[index].pinNumber = todo.pinNumber
+        this.decreaseNumber += 1;
         let todoRef = db.collection("todoList");
         todoRef.doc(id).update({pinNumber: todo.pinNumber})
         this.todos = this.sortByIndex(this.todos);
@@ -115,20 +114,19 @@ export default {
       });
       this.todos = todos;
 
-      this.increaseNunmber++;
       data = {
-        index: this.increaseNunmber,
+        index: this.increaseNunmber++,
         ...data
       }
       
       db.collection("todoList").add(data)
       .then((res) => {
-        this.todos.push({...data, id: res.id })
+        this.todos.push({...data, _id: res.id })
       })
       .catch(e => console.log(e))
     },
     handleDone(id){
-      let index = this.todos.findIndex(todo => todo.id === id);
+      let index = this.todos.findIndex(todo => todo._id === id);
       let todoRef = db.collection("todoList");
       todoRef.doc(id).update({
         todoStatus: 2
@@ -136,7 +134,7 @@ export default {
       .then (() => this.todos[index].todoStatus = 2)
     },
     handleCheck(id){
-      let index = this.todos.findIndex(todo => todo.id === id);
+      let index = this.todos.findIndex(todo => todo._id === id);
       let todoRef = db.collection("todoList");
       todoRef.doc(id).update({
         isChecked: !this.todos[index].isChecked

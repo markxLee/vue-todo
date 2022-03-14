@@ -5,6 +5,8 @@ function route(app) {
     app.use(`/${MONGO_DB}`, todoController);
     app.use(`/${MONGO_DB}/create`, todoController);
     app.use(`/${MONGO_DB}/done`, todoController);
+    app.use(`/${MONGO_DB}/check`, todoController);
+    app.use(`/${MONGO_DB}/pin`, todoController);
     app.use(`/${MONGO_DB}/delete`, todoController);
 }
 

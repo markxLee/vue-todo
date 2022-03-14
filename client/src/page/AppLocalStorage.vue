@@ -36,6 +36,9 @@ export default {
   created() {
     this.todos = JSON.parse(localStorage.getItem(TODO_LOCAL_STORAGE) || '[]');
   },
+  async mounted () {
+    this.decreaseNumber = this.todos.length;
+  },
   data() {
     return {
         decreaseNumber: 0,
@@ -50,16 +53,16 @@ export default {
   },
   methods: {
     handleDelete(id) {
-      let index = this.todos.findIndex(todo => todo.id === id);
+      let index = this.todos.findIndex(todo => todo._id === id);
       this.todos.splice(index, 1);
       localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
     },
     handlePin(id) {
-      let index = this.todos.findIndex(todo => todo.id === id);
+      let index = this.todos.findIndex(todo => todo._id === id);
       const todo = this.todos[index];
 
       const isNotPinned = !todo.pinNumber ? true : false;
-      this.decreaseNumber = this.todos.length;
+      this.decreaseNumber = this.decreaseNumber && this.todos.length;
       if(isNotPinned) {
         if(todo.pinNumber === 0 ){
           todo.pinNumber = this.decreaseNumber;
@@ -70,13 +73,10 @@ export default {
             this.decreaseNumber -= 1;
           }
         }
-
-        this.todos[index].pinNumber = todo.pinNumber;
         localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
       } else {
         todo.pinNumber = 0;
-        this.todos[index].pinNumber = todo.pinNumber
-
+        this.decreaseNumber += 1;
         this.todos = this.sortByIndex(this.todos);
         localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
       }
@@ -100,23 +100,21 @@ export default {
       });
       this.todos = todos;
 
-      this.increaseNunmber++;
       data = {
-        id: uuidv4(),
-        index: this.increaseNunmber,
+        _id: uuidv4(),
+        index: this.increaseNunmber++,
         ...data
       }
       this.todos.push(data);
       localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
     },
     handleDone(id){
-      let index = this.todos.findIndex(todo => todo.id === id);
+      let index = this.todos.findIndex(todo => todo._id === id);
       this.todos[index].todoStatus = 2;
       localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
-      
     },
     handleCheck(id){
-      let index = this.todos.findIndex(todo => todo.id === id);
+      let index = this.todos.findIndex(todo => todo._id === id);
       this.todos[index].isChecked = !this.todos[index].isChecked;
       localStorage.setItem(TODO_LOCAL_STORAGE, JSON.stringify(this.todos));
     }

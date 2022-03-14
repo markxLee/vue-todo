@@ -36,48 +36,45 @@ export default {
     this.todos = (await Todo.index()).data || '[]';
   },
   async mounted () {
+    this.decreaseNumber = this.todos.length;
   },
   data() {
     return {
         decreaseNumber: 0,
-        increaseNunmber: 0,
+        increaseNumber: 0,
         todos: []
     }
   },
   computed: {
     sortPinList(){
       return this.sortByPinNumber();
-    },
+    }
   },
   methods: {
-    async handleDelete(id) {
-      let index = this.todos.findIndex(todo => todo.id === id);
-      console.log(id);
-      await Todo.delete(id);
-      this.todos.splice(index, 1);
-    },
-    handlePin(id) {
-      let index = this.todos.findIndex(todo => todo.id === id);
+    async handlePin(id) {
+      let index = this.todos.findIndex(todo => todo._id === id);
       const todo = this.todos[index];
 
       const isNotPinned = !todo.pinNumber ? true : false;
-      this.decreaseNumber = this.todos.length;
+      this.decreaseNumber = this.decreaseNumber && this.todos.length;
       if(isNotPinned) {
         if(todo.pinNumber === 0 ){
+          console.log("decreaseNumber Before:=", this.decreaseNumber);
           todo.pinNumber = this.decreaseNumber;
           this.decreaseNumber -= 1;
+          console.log("decreaseNumber After:=", this.decreaseNumber);
         } else {
-          if(todo.pinNumber !== 0 && (todo.pinNumber < this.decreaseNumber)){
+          if(todo.pinNumber < this.decreaseNumber){
             todo.pinNumber = this.decreaseNumber;
             this.decreaseNumber -= 1;
           }
         }
-
-        this.todos[index].pinNumber = todo.pinNumber;
+        await Todo.pin({id, pinNumber: todo.pinNumber});
       } else {
         todo.pinNumber = 0;
-        this.todos[index].pinNumber = todo.pinNumber
-
+        this.decreaseNumber += 1;
+        console.log("CALL UNPIN METHOD");
+        await Todo.pin({id, pinNumber: todo.pinNumber});
         this.todos = this.sortByIndex(this.todos);
       }
     },
@@ -92,20 +89,34 @@ export default {
       });
     },
     async handleAdd(data){
+      const todos = [...this.todos]
+      todos.forEach((todo, index) => {
+        if(todo.pinNumber !== 0) {
+          todos[index].pinNumber++;
+        }
+      });
+      this.todos = todos;
+
       data = {
-        index: this.increaseNunmber,
+        index: this.increaseNumber++,
         ...data
       }
-      await Todo.create(data);
-      this.todos.push(data);
+      const _id = await Todo.create(data);
+      this.todos.push({_id, ...data});
+    },
+    async handleDelete(id) {
+      let index = this.todos.findIndex(todo => todo._id === id);
+      await Todo.delete({id});
+      this.todos.splice(index, 1);
     },
     async handleDone(id){
-      let index = this.todos.findIndex(todo => todo.id === id);
+      let index = this.todos.findIndex(todo => todo._id === id);
       await Todo.done({id});
       this.todos[index].todoStatus = 2;
     },
-    handleCheck(id){
-      let index = this.todos.findIndex(todo => todo.id === id);
+    async handleCheck(id){
+      let index = this.todos.findIndex(todo => todo._id === id);
+      await Todo.check({id});
       this.todos[index].isChecked = !this.todos[index].isChecked;
     }
   }

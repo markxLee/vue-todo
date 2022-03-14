@@ -39,7 +39,7 @@ export default {
             if(this.$refs.name.validate(true) && this.inputText){
                 const data = {
                     content: this.inputText,
-                    isChecked: false,
+                    isChecked: true,
                     pinNumber: 0,
                     todoStatus: 1,
                 }

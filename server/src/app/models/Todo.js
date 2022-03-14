@@ -6,7 +6,7 @@ const Todo = new Schema({
     index: {type: Number, maxlength: 50},
     isChecked: {type: Boolean},
     pinNumber: {type: Number, maxlength: 50},
-    todoStatus: {type: Boolean}
+    todoStatus: {type: Number}
 });
 
 module.exports = mongoose.model("Todo", Todo);
