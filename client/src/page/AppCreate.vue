@@ -33,7 +33,12 @@ export default {
     InputItem,
   },
   async created() {
-    this.todos = (await Todo.index()).data || '[]';
+    try {
+      this.tokens = JSON.parse(localStorage.getItem("token") || '[]');
+      this.todos = (await Todo.index(this.tokens)).data || '[]';
+    } catch (error) {
+      console.log(error);
+    }
   },
   async mounted () {
     this.decreaseNumber = this.todos.length;
@@ -42,7 +47,8 @@ export default {
     return {
         decreaseNumber: 0,
         increaseNumber: 0,
-        todos: []
+        todos: [],
+        tokens: [],
     }
   },
   computed: {

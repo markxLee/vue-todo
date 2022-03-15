@@ -1,22 +1,27 @@
-import Api from "@/services/Api"
+import {apiData} from "@/services/Api"
 
 export default {
-    index() {
-        return Api().get('/');
+    index(payload) {
+        return apiData().get('/', {headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${payload.accessToken}`
+            }
+        });
     },
     create(payload) {
-        return Api().post('/create', payload);
+        return apiData().post('/create', payload);
     },
     delete(payload) {
-        return Api().delete('/delete', {data: payload});
+        return apiData().delete('/delete', {data: payload});
     },
     done(payload) {
-        return Api().put('/done', payload);
+        return apiData().put('/done', payload);
     },
     check(payload) {
-        return Api().put('/check', payload);
+        return apiData().put('/check', payload);
     },
     pin(payload) {
-        return Api().put('/pin', payload);
+        return apiData().put('/pin', payload);
     }
 }

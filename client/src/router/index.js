@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import AppFireStore from '../page/AppFireStore.vue'
 import AppLocalStorage from '../page/AppLocalStorage.vue'
 import AppCreate from '../page/AppCreate.vue'
+import Login from '../page/Login.vue'
 
 Vue.use(VueRouter)
 
@@ -21,6 +22,11 @@ const routes = [
     path: '/mongodb',
     name: 'mongodb',
     component: AppCreate
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login
   }
 ]
 
