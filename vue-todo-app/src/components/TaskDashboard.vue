@@ -40,10 +40,11 @@
 </template>
 
 <script>
-  import { getAllTasks, createUser } from '../services/TaskService'
+  import { getAllTasks, createUser, getTasks, deleteTask, updateTask } from '../services/TaskService'
   import createTask from './CreateTask.vue'
   import listTasks from './ListTasks.vue'
   import Task from '../classes/Task.js'
+  import db from '@/firestore'
 
   export default {
     name: 'ListTodo',
@@ -73,6 +74,11 @@
         //   this.sortTask()
         // })
       },
+
+      notUse() {
+        getAllTasks()
+      },
+
       userCreate(data) {
         console.log('data:::', data)
         createUser(data).then(response => {
@@ -82,48 +88,86 @@
       },
 
       doneTask(id) {
+        let task = null
+
         this.tasks.forEach(v => {
           if(v.id == id) {
             v.status = 1
             v.pin = 0
+            task = v
           }
         })
-        this.saveLocalStorage();
+        this.sortTask()
+        if(this.currentTab == 1)
+          this.saveLocalStorage();
+        else if(this.currentTab == 2)
+        {
+          updateTask(id, {...task})
+        }
       },
 
       removeTask(id) {
         this.tasks = this.tasks.filter(v => v.id != id)
-        this.saveLocalStorage();
-
+        if(this.currentTab == 1)
+          this.saveLocalStorage();
+        else if(this.currentTab == 2)
+          deleteTask(id)
       },
 
       pinTask(id) {
+        console.log(id)
+        let task = null
+        let maxPin = Math.max.apply(Math, this.tasks.map(function(o) { return o.pin; })) + 1
         this.tasks.forEach(v => {
           if(v.id == id)
-            v.pin = 1
+          {
+            v.pin = maxPin
+            task = v
+          }
         })
+        console.log(task)
         this.sortTask()
-        this.saveLocalStorage();
+        if(this.currentTab == 1)
+          this.saveLocalStorage();
+        else if(this.currentTab == 2) {
+          updateTask(id, {...task})
+        }
       },
 
       unpinTask(id) {
+        let task = null;
+
         this.tasks.forEach(v => {
-          if(v.id == id)
+          if(v.id == id) { 
             v.pin = 0
+            task = v
+          }
         })
         this.sortTask()
-        this.saveLocalStorage();
+        if(this.currentTab == 1) {
+          this.saveLocalStorage();
+        }
+        else if(this.currentTab == 2) {
+          updateTask(id, {...task})
+        }
       },
 
       createTask(name, content) {
-        let maxId = Math.max.apply(Math, this.tasks.map(function(o) { return o.id; })) + 1
-        this.tasks.push(new Task(maxId, name, content, 0, 0));
-        this.saveLocalStorage()
+          let maxId = this.uid()//Math.max.apply(Math, this.tasks.map(function(o) { return o.id; })) + 1
+          let newTask = new Task(maxId, name, content, 0, 0)
+        if(this.currentTab == 1) {
+          this.tasks.push(newTask);
+          this.saveLocalStorage()
+        }
+        else if(this.currentTab == 2) {
+          db.collection('tasks').add({...newTask});
+          this.loadFirebaseStorage()
+        }
       },
 
       sortTask()
       {
-        let tasks1 = this.tasks.filter(t => t.pin !=0)
+        let tasks1 = this.tasks.filter(t => t.pin !=0).sort((a, b) => parseInt(a.pin) - parseInt(b.pin));
         let tasks2 = this.tasks.filter(t => t.pin == 0)
         this.tasks = tasks1.concat(tasks2)
       },
@@ -150,10 +194,19 @@
 
       loadFirebaseStorage() {
         this.tasks = []
+        getTasks().then(response => {
+          console.log(response)
+          this.tasks = response
+          this.sortTask()
+        })
       },
 
       loadServerStorage() {
         this.tasks = []
+      },
+
+      uid() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
       }
     },
     mounted () {

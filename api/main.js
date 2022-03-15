@@ -1,10 +1,14 @@
 const express = require('express');
+var mongoose = require('mongoose');
 const path = require('path');
 const app = express(),
       bodyParser = require("body-parser");
       port = 8888;
-
+mongoose.connect('mongodb://localhost:8888/test')
 // place holder for the data
+const db = mongoose.connection
+db.on('error', (error) => console.error(error))
+db.once('open', () => console.log('Connected to Database'))
 const users = [
   {
     id: 1,

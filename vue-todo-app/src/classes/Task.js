@@ -1,9 +1,9 @@
 export default class Task {
-    id= 0;
-    name= '';
-    content= '';
-    status= 0;
-    pin= 0;
+    id= String;
+    name= String;
+    content= String;
+    status= Number;
+    pin= Number;
  
     constructor(cId, cName, cContent, cStatus, cPin) {
         this.id = cId;

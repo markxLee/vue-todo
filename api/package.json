@@ -20,8 +20,9 @@
   "homepage": "https://github.com/markxLee/vue-todo#readme",
   "dependencies": {
     "express": "^4.17.3",
-    "supervisor": "^0.12.0",
-    "http-proxy-middleware": "^1.0.4"
+    "http-proxy-middleware": "^1.0.4",
+    "mongoose": "^6.2.6",
+    "supervisor": "^0.12.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
