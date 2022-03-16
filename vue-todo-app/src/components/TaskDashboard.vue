@@ -1,10 +1,15 @@
 <template>
   <v-container>
     <v-card color="basil">
-      <v-card-title class="text-center justify-center">
-        <h5 class="font-weight-bold text-h5 basil--text">
-          TASKS MANAGEMENT
-        </h5>
+      <v-card-title class="align-center">
+        <v-row no-gutters class="align-center">
+          <v-col cols="3">
+            <h5 class="font-weight-bold text-h5 basil--text">
+              TASKS MANAGEMENT
+            </h5>
+          </v-col>
+          <sync-task></sync-task>
+        </v-row>
       </v-card-title>
       <v-tabs
         v-model="tab"
@@ -40,16 +45,17 @@
 </template>
 
 <script>
-  import { getAllTasks, createUser, getTasks, deleteTask, updateTask } from '../services/TaskService'
+  import { getAllTasks, createTaskServer, updateTaskServer, deleteTaskServer, getTasks, deleteTask, updateTask } from '../services/TaskService'
   import createTask from './CreateTask.vue'
   import listTasks from './ListTasks.vue'
+  import syncTask from './SyncTask.vue'
   import Task from '../classes/Task.js'
   import db from '@/firestore'
 
   export default {
     name: 'ListTodo',
     components: {
-      createTask, listTasks
+      createTask, listTasks, syncTask
     },
 
     data: () => ({
@@ -81,7 +87,7 @@
 
       userCreate(data) {
         console.log('data:::', data)
-        createUser(data).then(response => {
+        createTaskServer(data).then(response => {
           console.log(response);
           this.getAllTasks();
         });
@@ -104,14 +110,29 @@
         {
           updateTask(id, {...task})
         }
+        else { 
+          updateTaskServer(task._id, task)
+        }
       },
 
-      removeTask(id) {
-        this.tasks = this.tasks.filter(v => v.id != id)
+      async removeTask(id) {
         if(this.currentTab == 1)
+        {         
           this.saveLocalStorage();
+          this.tasks = this.tasks.filter(v => v.id != id)
+
+        }
         else if(this.currentTab == 2)
+        {
           deleteTask(id)
+          this.tasks = this.tasks.filter(v => v.id != id)
+
+        }
+        else
+        {
+          if(await deleteTaskServer(this.tasks.find(e => e.id === id)?._id))
+            this.tasks = this.tasks.filter(v => v.id != id)
+        }
       },
 
       pinTask(id) {
@@ -132,6 +153,9 @@
         else if(this.currentTab == 2) {
           updateTask(id, {...task})
         }
+        else {
+          updateTaskServer(task._id, task)
+        }
       },
 
       unpinTask(id) {
@@ -150,9 +174,12 @@
         else if(this.currentTab == 2) {
           updateTask(id, {...task})
         }
+        else {
+          updateTaskServer(task._id, task)
+        }
       },
 
-      createTask(name, content) {
+      async createTask(name, content) {
           let maxId = this.uid()//Math.max.apply(Math, this.tasks.map(function(o) { return o.id; })) + 1
           let newTask = new Task(maxId, name, content, 0, 0)
         if(this.currentTab == 1) {
@@ -162,6 +189,13 @@
         else if(this.currentTab == 2) {
           db.collection('tasks').add({...newTask});
           this.loadFirebaseStorage()
+        }
+        else { 
+          let rs = await createTaskServer({...newTask})
+          if(typeof rs == 'object')
+            this.tasks.push(rs)
+          else
+            alert('Error')
         }
       },
 
@@ -203,6 +237,11 @@
 
       loadServerStorage() {
         this.tasks = []
+        getAllTasks().then(response => {
+          this.tasks = response
+          this.sortTask()
+          console.log(this.tasks)
+        })
       },
 
       uid() {
@@ -215,3 +254,8 @@
   }
   
 </script>
+<style>
+  /* .v-label {
+    font-size: smaller
+  } */
+</style>

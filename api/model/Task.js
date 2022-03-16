@@ -10,6 +10,8 @@ var taskSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     }
+}, {
+    versionKey: false 
 });
 // Export Contact model
 var Task = module.exports = mongoose.model('task', taskSchema);

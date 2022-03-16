@@ -23,7 +23,35 @@ export async function getAllTasks() {
     return response.data;
 }
 
-export async function createUser(data) {
-    const response = await axios.post(`/api/user`, {user: data});
-    return response.data;
+export async function createTaskServer(data) {
+    const response = await axios.post(`/api/task`, {task: data}).catch(function (error) {
+        console.log(error);
+        return false
+    });
+    if(response.status === 201) {
+        return response.data
+    }
+    else return false
+}
+
+export async function updateTaskServer(id, data) {
+    const response = await axios.patch(`/api/task/${id}`, {task: data}).catch(function (error) {
+        console.log(error);
+        return false
+    });
+    if(response.status === 201) {
+        return response.data
+    }
+    else return false
+}
+
+export async function deleteTaskServer(id) {
+    const response = await axios.delete(`/api/task/${id}`).catch(function (error) {
+        console.log(error);
+        return false
+    });
+    if(response.status === 200) {
+        return true
+    }
+    else return false
 }
