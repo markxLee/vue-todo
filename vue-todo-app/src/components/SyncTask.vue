@@ -28,7 +28,7 @@
         </v-radio-group>
         <v-btn
             color="#f7ec77"
-            @click=doneTask(task.id)
+            @click="syncTask"
             small
             depressed
         >
@@ -53,6 +53,12 @@
             if((i==1 && value == this.target) ||(i==2 && value == this.source))
                 return true; 
             return false;
+        },
+
+        async syncTask() {
+            if(this.target) {
+                await this.$emit("syncTask", this.source, this.target);
+            }
         }
     },
     computed: {
@@ -74,12 +80,12 @@
                 this.target = arrValues[0]
             },
         },
-        target: {
-            handler(newValue) {
-                let arrValues = [1,2,3].filter(v => v!= newValue)
-                this.source = arrValues[0]
-            },
-        }
+        // target: {
+        //     handler(newValue) {
+        //         let arrValues = [1,2,3].filter(v => v!= newValue)
+        //         this.source = arrValues[0]
+        //     },
+        // }
         // source: {
         //     handler(newValue) {
         //         this.targets.forEach(v => {

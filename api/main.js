@@ -34,6 +34,21 @@ app.post('/api/task', async (req, res) => {
   }
 });
 
+app.post('/api/tasks', async (req, res) => {
+  const tasks = req.body.tasks;
+  try {
+    let successList = []
+    tasks.forEach(task =>{
+      let newTask = new Task(task)
+      let check = newTask.save()
+      successList.push(check)
+    })
+    res.status(201).json(successList)
+  } catch (err) {
+    res.status(400).json({ message: err.message })
+  }
+});
+
 app.delete('/api/task/:id', async (req, res) => {
   const task = await Task.findById(req.params.id)
   if(task) {

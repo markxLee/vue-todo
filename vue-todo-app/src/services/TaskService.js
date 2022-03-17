@@ -34,6 +34,17 @@ export async function createTaskServer(data) {
     else return false
 }
 
+export async function createTasksServer(data) {
+    const response = await axios.post(`/api/tasks`, {tasks: data}).catch(function (error) {
+        console.log(error);
+        return false
+    });
+    if(response.status === 201) {
+        return response.data
+    }
+    else return false
+}
+
 export async function updateTaskServer(id, data) {
     const response = await axios.patch(`/api/task/${id}`, {task: data}).catch(function (error) {
         console.log(error);
