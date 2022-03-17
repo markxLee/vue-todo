@@ -8,7 +8,7 @@
               outlined
               ref="name"
               hide-details="auto"
-              placeholder="Enter task title"
+              placeholder="Enter user name"
               v-model="username"
               name="inputText"
               v-on:keyup.enter="Login"
@@ -36,8 +36,8 @@ export default {
       try {
         const {data: token} = await Auth.login({username: this.username});
         localStorage.setItem("token", JSON.stringify(token));
-        const path = this.$router.options.routes.find(route => route.path === "/mongodb").path;
-        this.$router.push({path: path})
+        const path = "/mongodb";
+        this.$router.push(path)
       } catch (error) {
         console.log(error);
       }

@@ -4,6 +4,7 @@ import AppFireStore from '../page/AppFireStore.vue'
 import AppLocalStorage from '../page/AppLocalStorage.vue'
 import AppCreate from '../page/AppCreate.vue'
 import Login from '../page/Login.vue'
+import SyncData from '../page/SyncData.vue'
 
 Vue.use(VueRouter)
 
@@ -27,6 +28,11 @@ const routes = [
     path: '/login',
     name: 'login',
     component: Login
+  },
+  {
+    path: '/sync',
+    name: 'sync',
+    component: SyncData
   }
 ]
 

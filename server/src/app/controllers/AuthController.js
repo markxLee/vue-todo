@@ -19,7 +19,7 @@ generateTokens = payload => {
     const accessToken = jwt.sign({id, username}, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1m"
     });
-    
+
     const refreshAccessToken = jwt.sign({id, username}, process.env.REFRESH_ACCESS_TOKEN_SECRET, {
         expiresIn: "1h"
     });
@@ -29,7 +29,7 @@ generateTokens = payload => {
 
 updateRefreshAccessToken = (username, refreshAccessToken) => {
     users = users.map(user => {
-        if(user.username === username) 
+        if(user.username === username)
             return {
                 ...user,
                 refreshAccessToken
@@ -42,7 +42,7 @@ class AuthController {
     login(req, res) {
         const username = req.body.username;
         const user = users.find(user => user.username === username);
-        
+
         if(!user) return res.sendStatus(401);
 
         const tokens = generateTokens(user);
@@ -61,12 +61,6 @@ class AuthController {
             jwt.verify(refreshAccessToken, process.env.REFRESH_ACCESS_TOKEN_SECRET);
             const tokens = generateTokens(user);
             updateRefreshAccessToken(user.username, tokens.refreshAccessToken);
-            res.cookie("refreshAccessToken", tokens.refreshAccessToken, {
-                httpOnly: true,
-                secure: false,
-                path: "/",
-                sameSite: "strict"
-            });
             res.json(tokens);
         } catch (error) {
             console.log(error);

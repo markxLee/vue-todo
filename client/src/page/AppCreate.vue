@@ -79,7 +79,6 @@ export default {
       } else {
         todo.pinNumber = 0;
         this.decreaseNumber += 1;
-        console.log("CALL UNPIN METHOD");
         await Todo.pin({id, pinNumber: todo.pinNumber});
         this.todos = this.sortByIndex(this.todos);
       }
