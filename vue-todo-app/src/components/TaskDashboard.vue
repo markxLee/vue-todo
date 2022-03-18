@@ -1,6 +1,19 @@
 <template>
   <v-container>
     <v-card color="basil">
+      <v-row class="justify-end pr-3">
+          <v-btn v-if="isLogin"
+            color="#D15555"
+            @click="logoutUser"
+            small
+            depressed
+          >
+              <v-icon left>
+              mdi-logout
+              </v-icon>
+              logout
+          </v-btn>
+      </v-row>
       <v-card-title class="align-center">
         <v-row no-gutters class="align-center">
           <v-col cols="3">
@@ -41,28 +54,35 @@
         </v-tab-item>
       </v-tabs-items>
     </v-card>
+    <loginForm v-if="displayLogin" :errors="errorsLogin" @loginUser="loginUser"></loginForm>
   </v-container>
 </template>
 
 <script>
   import { getAllTasks, createTaskServer, createTasksServer, updateTaskServer, deleteTaskServer, getTasks, deleteTask, updateTask, addTask } from '../services/TaskService'
+  import { loginUser, authUser, logoutUser } from '../services/Auth'
+
   import createTask from './CreateTask.vue'
   import listTasks from './ListTasks.vue'
   import syncTask from './SyncTask.vue'
+  import loginForm from './LoginUser.vue'
   import Task from '../classes/Task.js'
   // import db from '@/firestore'
 
   export default {
     name: 'ListTodo',
     components: {
-      createTask, listTasks, syncTask
+      createTask, listTasks, syncTask, loginForm
     },
 
     data: () => ({
       tasks: [],
       numberOfTasks: 0,
       tab: null,
+      displayLogin: false,
       currentTab: 1,
+      errorsLogin: '',
+      isLogin: false,
       tabs: [
         {'id' : 1, 'text': 'LOCAL STORAGE'}, {'id': 2, 'text': 'FIREBASE'}, {'id': 3, 'text': 'SERVER (NODEJS)'}
       ],
@@ -295,14 +315,52 @@
         this.tasks = tasks1.concat(tasks2)
       },
 
-      changeTab(id) {
+      async changeTab(id) {
         this.currentTab = id
         if(id == 1)
           this.loadLocalStorage()
         else if(id == 2)
           this.loadFirebaseStorage()
         else
-          this.loadServerStorage()
+        {
+          this.tasks = []
+          let check = await authUser();
+          if(check.isAuthenticated == true)
+          {
+            this.isLogin = true
+            await this.loadServerStorage()
+          }
+          else
+          {
+            this.displayLogin = true
+          }
+          // console.log(await loginUser('test', '123456'))
+        }
+      },
+
+      async loginUser(id, pass) {
+        let user = await loginUser(id, pass)
+        if(user.userName == id)
+        {
+          this.displayLogin = false
+          this.isLogin = true
+          await this.loadLocalStorage()
+        }
+        else
+        {
+          console.log(user)
+          this.errorsLogin = {"id": false, "password": false}
+        }
+      },
+
+      async logoutUser() {
+        let check = await logoutUser();
+        if(check)
+        {
+          this.isLogin = false
+          this.tab = 0
+          this.changeTab(1)
+        }
       },
 
       saveLocalStorage() {
@@ -324,7 +382,7 @@
         })
       },
 
-      loadServerStorage() {
+      async loadServerStorage() {
         this.tasks = []
         getAllTasks().then(response => {
           this.tasks = response

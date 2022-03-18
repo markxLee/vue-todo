@@ -1,20 +1,28 @@
 const express = require('express');
+require('dotenv').config();
 var mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 const path = require('path');
-const Task = require('./model/Task')
+const Task = require('./models/Task')
 const app = express(),
       bodyParser = require("body-parser");
       port = 8888;
-mongoose.connect('mongodb://localhost:27017')
+mongoose.connect(process.env.DATABASE)
+mongoose.Promise = global.Promise
+
 // place holder for the data
 const db = mongoose.connection
 db.on('error', (error) => console.error(error))
 db.once('open', () => console.log('Connected to Database'))
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../my-app/build')));
+const { auth } = require('./middleware/auth')
+const { RegisterUser, LoginUser, LogoutUser,getUserDetails } = require('./controller/AuthController');
 
-app.get('/api/list-tasks',async (req, res) => {
+app.get('/api/list-tasks', auth,async (req, res) => {
   try {
     const tasks = await Task.find()
     res.json(tasks)
@@ -23,7 +31,7 @@ app.get('/api/list-tasks',async (req, res) => {
   }
 });
 
-app.post('/api/task', async (req, res) => {
+app.post('/api/task', auth, async (req, res) => {
   const task = req.body.task;
   const newTask = new Task(task)
   try {
@@ -34,7 +42,7 @@ app.post('/api/task', async (req, res) => {
   }
 });
 
-app.post('/api/tasks', async (req, res) => {
+app.post('/api/tasks', auth, async (req, res) => {
   const tasks = req.body.tasks;
   try {
     let successList = []
@@ -49,7 +57,7 @@ app.post('/api/tasks', async (req, res) => {
   }
 });
 
-app.delete('/api/task/:id', async (req, res) => {
+app.delete('/api/task/:id', auth, async (req, res) => {
   const task = await Task.findById(req.params.id)
   if(task) {
     try {
@@ -61,7 +69,7 @@ app.delete('/api/task/:id', async (req, res) => {
   }
 });
 
-app.patch('/api/task/:id', async (req, res) => {
+app.patch('/api/task/:id', auth, async (req, res) => {
   const task = await Task.findById(req.params.id)
   if(task) {
     try {
@@ -80,3 +88,9 @@ app.get('/', (req,res) => {
 app.listen(port, () => {
     console.log(`Server listening on the port::${port}`);
 });
+
+
+app.post('/api/users/register',RegisterUser);
+app.post('/api/users/login',LoginUser);
+app.get('/api/users/auth', auth,getUserDetails);
+app.get('/api/users/logout', auth, LogoutUser);
