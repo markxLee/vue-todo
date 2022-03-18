@@ -12,6 +12,7 @@
               v-model="username"
               name="inputText"
               v-on:keyup.enter="Login"
+              v-bind:rules="rules"
           >
           </v-text-field>
         </v-card-text>
@@ -29,6 +30,7 @@ export default {
     return {
         username: "",
         path: "",
+        rules: [],
     }
   },
   methods: {
@@ -40,6 +42,7 @@ export default {
         this.$router.push(path)
       } catch (error) {
         console.log(error);
+        this.rules = [...this.rules, 'User not exist'];
       }
     }
   }

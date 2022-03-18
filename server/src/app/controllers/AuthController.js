@@ -1,18 +1,8 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const User = require("../models/User")
 
-let users = [
-    {
-        id: 1,
-        username: "ninh",
-        refreshAccessToken: null
-    },
-    {
-        id: 2,
-        username: "deptrai",
-        refreshAccessToken: null
-    }
-]
+let user = Object.create(null);
 
 generateTokens = payload => {
     const {id, username} = payload;
@@ -27,40 +17,33 @@ generateTokens = payload => {
     return {accessToken, refreshAccessToken};
 }
 
-updateRefreshAccessToken = (username, refreshAccessToken) => {
-    users = users.map(user => {
-        if(user.username === username)
-            return {
-                ...user,
-                refreshAccessToken
-            }
-        return user;
-    })
+updateRefreshAccessToken = (refreshAccessToken) => {
+    user = {
+        ...user,
+        refreshAccessToken
+    }
 }
 
 class AuthController {
-    login(req, res) {
-        const username = req.body.username;
-        const user = users.find(user => user.username === username);
-
+    async login(req, res) {
+        user = await User.findOne({ username : req.body.username});
         if(!user) return res.sendStatus(401);
-
+        user = {...user};
         const tokens = generateTokens(user);
-        updateRefreshAccessToken(username, tokens.refreshAccessToken);
+        updateRefreshAccessToken(tokens.refreshAccessToken);
         res.json(tokens);
     };
 
-    token(req, res){
+    async token(req, res){
         const refreshAccessToken = req.body.refreshAccessToken;
         if(!refreshAccessToken) return res.sendStatus(401);
 
-        const user = users.find(user => user.refreshAccessToken === refreshAccessToken);
-        if(!user) return res.sendStatus(403);
+        if(refreshAccessToken !== user.refreshAccessToken) return res.sendStatus(403);
 
         try {
             jwt.verify(refreshAccessToken, process.env.REFRESH_ACCESS_TOKEN_SECRET);
             const tokens = generateTokens(user);
-            updateRefreshAccessToken(user.username, tokens.refreshAccessToken);
+            updateRefreshAccessToken(tokens.refreshAccessToken);
             res.json(tokens);
         } catch (error) {
             console.log(error);
@@ -69,7 +52,6 @@ class AuthController {
     };
 
     logout(req, res) {
-        const user = users.find(user => user.id === req.userId);
         updateRefreshAccessToken(user.username, null);
         res.sendStatus(204);
     };
