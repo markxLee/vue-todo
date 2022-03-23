@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { List, FormControl } from "@mui/material/";
 import { v4 as uuidv4 } from "uuid";
 
-import TodoInput from "../../components/Todo/TodoInput";
-import TodoItem from "../.././components/Todo/TodoItem";
+import TodoInput from "../../components/Todo/TodoInput/TodoInput";
+import TodoItem from "../../components/Todo/TodoItem/TodoItem";
 
 function TodoList() {
   const [todoItem, setTodoItem] = useState({});
@@ -46,6 +46,7 @@ function TodoList() {
       localStorage.setItem("todoList", JSON.stringify(newTodoList));
       return newTodoList;
     });
+    setTodoItem({});
   };
 
   const handleCheck = (id) => {
