@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import {
   ListItem,
   ListItemIcon,
@@ -10,7 +10,9 @@ import {
 
 function TodoItem({ data, ...event }) {
   let { id, content, pinNumber, todoStatus, isChecked } = data;
-  const {onCheck, onRemove, onDone, onPin} = event;
+  const { onCheck, onRemove, onDone, onPin } = event;
+
+  console.log("render");
 
   return (
     <ListItem disablePadding>
@@ -62,4 +64,4 @@ function TodoItem({ data, ...event }) {
   );
 }
 
-export default TodoItem;
+export default memo(TodoItem);

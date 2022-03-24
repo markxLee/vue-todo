@@ -1,28 +1,56 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { List, FormControl } from "@mui/material/";
-import { v4 as uuidv4 } from "uuid";
 
 import TodoInput from "../../components/Todo/TodoInput/TodoInput";
 import TodoItem from "../../components/Todo/TodoItem/TodoItem";
+import db from "../../firebase-config";
+import {
+  collection,
+  query,
+  orderBy,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  serverTimestamp,
+} from "firebase/firestore";
 
 function TodoList() {
   const [todoItem, setTodoItem] = useState({});
-  const [todoList, setTodoList] = useState(() => {
-    const initData = JSON.parse(localStorage.getItem("todoList")) || [];
-    const hasPinNumber = initData.some((data) => data.pinNumber !== 0);
-    if (hasPinNumber) {
-      initData.sort(function (a, b) {
-        return b.pinNumber - a.pinNumber;
-      });
-    } else {
-      initData.sort(function (a, b) {
-        return a.index - b.index;
-      });
-    }
-    return initData;
-  });
-  const [decreaseNumber, setDecreaseNumber] = useState(todoList.length);
+  const [todoList, setTodoList] = useState([]);
+  const [decreaseNumber, setDecreaseNumber] = useState(0);
   const [sortByIndex, setSortByIndex] = useState(false);
+  const listData = useRef();
+  listData.current = todoList;
+
+  useEffect(() => {
+    const todoListRef = collection(db, "todos");
+    const listIncreaseQuery = query(todoListRef, orderBy("timestamp", "asc"));
+    const getTodoList = async () => {
+      const data = await getDocs(listIncreaseQuery);
+      let hasPinNumber = false;
+      let sortByPinNumberList = data.docs.map((doc) => {
+        if (doc.data().pinNumber !== 0) {
+          hasPinNumber = true;
+        }
+        return {
+          ...doc.data(),
+          id: doc.id,
+        };
+      });
+      if (hasPinNumber) {
+        sortByPinNumberList.sort(function (a, b) {
+          return b.pinNumber - a.pinNumber;
+        });
+      }
+      setTodoList(() => {
+        setDecreaseNumber(data.docs.length);
+        return sortByPinNumberList;
+      });
+    };
+    getTodoList();
+  }, []);
 
   useEffect(() => {
     setTodoList((prev) => {
@@ -34,9 +62,8 @@ function TodoList() {
 
   const handleChange = (e) => {
     let data = {
-      id: uuidv4(),
       content: e.target.value,
-      index: +todoList.length + 1,
+      timestamp: serverTimestamp(),
       pinNumber: 0,
       todoStatus: 1,
       isChecked: false,
@@ -50,16 +77,22 @@ function TodoList() {
     }
   };
 
-  const handleAdd = () => {
-    setTodoList((prev) => {
-      const newTodoList = [...prev, todoItem];
-      localStorage.setItem("todoList", JSON.stringify(newTodoList));
-      return newTodoList;
+  const handleAdd = async () => {
+    const todoListRef = collection(db, "todos");
+    const docRef = await addDoc(todoListRef, todoItem);
+
+    setTodoItem((prev) => {
+      const newTodoItem = {
+        ...prev,
+        id: docRef.id,
+      };
+      setTodoList([...todoList, newTodoItem]);
+      return newTodoItem;
     });
     setTodoItem({});
   };
 
-  const handleCheck = useCallback((id) => {
+  const handleCheck = useCallback(async (id) => {
     setTodoList((prev) => {
       const newTodoList = prev.map((data) => {
         if (data.id === id) {
@@ -70,20 +103,27 @@ function TodoList() {
         }
         return data;
       });
-      localStorage.setItem("todoList", JSON.stringify(newTodoList));
       return newTodoList;
     });
+
+    const docRef = doc(db, "todos", id);
+    const todoList = listData.current;
+    const isChecked = todoList.find((todoItem) => todoItem.id === id).isChecked;
+    const payload = { isChecked: !isChecked };
+    await updateDoc(docRef, payload);
   }, []);
 
-  const handleRemove = useCallback((id) => {
+  const handleRemove = useCallback(async (id) => {
     setTodoList((prev) => {
       const newTodoList = prev.filter((todo) => todo.id !== id);
-      localStorage.setItem("todoList", JSON.stringify(newTodoList));
       return newTodoList;
     });
+
+    const docRef = doc(db, "todos", id);
+    await deleteDoc(docRef);
   }, []);
 
-  const handleDone = useCallback((id) => {
+  const handleDone = useCallback(async (id) => {
     setTodoList((prev) => {
       const newTodoList = prev.map((data) => {
         if (data.id === id) {
@@ -94,13 +134,16 @@ function TodoList() {
         }
         return data;
       });
-      localStorage.setItem("todoList", JSON.stringify(newTodoList));
       return newTodoList;
     });
+
+    const docRef = doc(db, "todos", id);
+    const payload = { todoStatus: 2 };
+    await updateDoc(docRef, payload);
   }, []);
 
   const handlePin = useCallback(
-    (id) => {
+    async (id) => {
       setTodoList((prev) => {
         const itemPinCounts =
           prev.filter((data) => data.pinNumber !== 0).length || 0;
@@ -130,12 +173,19 @@ function TodoList() {
           }
           return data;
         });
-        localStorage.setItem("todoList", JSON.stringify(newTodoList));
+
         newTodoList.sort(function (a, b) {
           return b.pinNumber - a.pinNumber;
         });
         return newTodoList;
       });
+      const docRef = doc(db, "todos", id);
+      const todoList = listData.current;
+      const pinNumber = todoList.find(
+        (todoItem) => todoItem.id === id
+      ).pinNumber;
+      const payload = { pinNumber: pinNumber };
+      await updateDoc(docRef, payload);
     },
     [decreaseNumber, sortByIndex]
   );
