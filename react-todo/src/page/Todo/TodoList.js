@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { List, FormControl } from "@mui/material/";
 import { v4 as uuidv4 } from "uuid";
 
@@ -7,28 +7,18 @@ import TodoItem from "../../components/Todo/TodoItem/TodoItem";
 
 function TodoList() {
   const [todoItem, setTodoItem] = useState({});
-  const [todoList, setTodoList] = useState(() => {
-    const initData = JSON.parse(localStorage.getItem("todoList")) || [];
-    const hasPinNumber = initData.some((data) => data.pinNumber !== 0);
-    if (hasPinNumber) {
-      initData.sort(function (a, b) {
-        return b.pinNumber - a.pinNumber;
-      });
-    } else {
-      initData.sort(function (a, b) {
-        return a.index - b.index;
-      });
-    }
-    return initData;
-  });
+  const [todoList, setTodoList] = useState(
+    JSON.parse(localStorage.getItem("todoList")) || []
+  );
   const [decreaseNumber, setDecreaseNumber] = useState(todoList.length);
   const [sortByIndex, setSortByIndex] = useState(false);
 
   useEffect(() => {
     setTodoList((prev) => {
-      return prev.sort(function (a, b) {
+      const newTodoList = prev.sort(function (a, b) {
         return a.index - b.index;
       });
+      return newTodoList;
     });
   }, [sortByIndex]);
 
@@ -59,7 +49,7 @@ function TodoList() {
     setTodoItem({});
   };
 
-  const handleCheck = useCallback((id) => {
+  const handleCheck = (id) => {
     setTodoList((prev) => {
       const newTodoList = prev.map((data) => {
         if (data.id === id) {
@@ -73,17 +63,17 @@ function TodoList() {
       localStorage.setItem("todoList", JSON.stringify(newTodoList));
       return newTodoList;
     });
-  }, []);
+  };
 
-  const handleRemove = useCallback((id) => {
-    setTodoList((prev) => {
-      const newTodoList = prev.filter((todo) => todo.id !== id);
+  const handleRemove = (id) => {
+    const newTodoList = todoList.filter((todo) => todo.id !== id);
+    setTodoList(() => {
       localStorage.setItem("todoList", JSON.stringify(newTodoList));
       return newTodoList;
     });
-  }, []);
+  };
 
-  const handleDone = useCallback((id) => {
+  const handleDone = (id) => {
     setTodoList((prev) => {
       const newTodoList = prev.map((data) => {
         if (data.id === id) {
@@ -97,48 +87,43 @@ function TodoList() {
       localStorage.setItem("todoList", JSON.stringify(newTodoList));
       return newTodoList;
     });
-  }, []);
+  };
 
-  const handlePin = useCallback(
-    (id) => {
-      setTodoList((prev) => {
-        const itemPinCounts =
-          prev.filter((data) => data.pinNumber !== 0).length || 0;
-        let newTodoList = prev.map((data) => {
-          if (data.id === id) {
-            const isNotPinned = !data.pinNumber ? true : false;
-            setDecreaseNumber((prev) => prev && prev.length - itemPinCounts);
-            if (isNotPinned) {
-              if (data.pinNumber === 0) {
+  const handlePin = (id) => {
+    setTodoList((prev) => {
+      let newTodoList = prev.map((data) => {
+        if (data.id === id) {
+          const isNotPinned = !data.pinNumber ? true : false;
+          setDecreaseNumber((prev) => prev || todoList.length);
+          if (isNotPinned) {
+            if (data.pinNumber === 0) {
+              data.pinNumber = decreaseNumber;
+              setDecreaseNumber(decreaseNumber - 1);
+            } else {
+              if (data.pinNumber !== 0 && data.pinNumber < decreaseNumber) {
                 data.pinNumber = decreaseNumber;
                 setDecreaseNumber(decreaseNumber - 1);
-              } else {
-                if (data.pinNumber !== 0 && data.pinNumber < decreaseNumber) {
-                  data.pinNumber = decreaseNumber;
-                  setDecreaseNumber(decreaseNumber - 1);
-                }
               }
-              setSortByIndex(!sortByIndex);
-            } else {
-              data.pinNumber = 0;
-              setDecreaseNumber(decreaseNumber + 1);
-              setSortByIndex(!sortByIndex);
             }
-            return {
-              ...data,
-            };
+            setSortByIndex(!sortByIndex);
+          } else {
+            data.pinNumber = 0;
+            setDecreaseNumber(decreaseNumber + 1);
+            setSortByIndex(!sortByIndex);
           }
-          return data;
-        });
-        localStorage.setItem("todoList", JSON.stringify(newTodoList));
-        newTodoList.sort(function (a, b) {
-          return b.pinNumber - a.pinNumber;
-        });
-        return newTodoList;
+          return {
+            ...data,
+          };
+        }
+        return data;
       });
-    },
-    [decreaseNumber, sortByIndex]
-  );
+      localStorage.setItem("todoList", JSON.stringify(newTodoList));
+      newTodoList = newTodoList.sort(function (a, b) {
+        return b.pinNumber - a.pinNumber;
+      });
+      return newTodoList;
+    });
+  };
 
   return (
     <FormControl sx={{ ml: 25, mt: 5, width: "75%" }} variant="outlined">
