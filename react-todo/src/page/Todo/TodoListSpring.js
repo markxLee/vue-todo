@@ -1,41 +1,49 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { List, FormControl } from "@mui/material/";
-import { v4 as uuidv4 } from "uuid";
 
 import TodoInput from "../../components/Todo/TodoInput/TodoInput";
 import TodoItem from "../../components/Todo/TodoItem/TodoItem";
+import * as Todo from "../../services/Todo";
 
 function TodoList() {
+  const [decreaseNumber, setDecreaseNumber] = useState(0);
   const [todoItem, setTodoItem] = useState({});
-  const [todoList, setTodoList] = useState(() => {
-    const initData = JSON.parse(localStorage.getItem("todoList")) || [];
-    const hasPinNumber = initData.some((data) => data.pinNumber !== 0);
-    if (hasPinNumber) {
-      initData.sort(function (a, b) {
-        return b.pinNumber - a.pinNumber;
-      });
-    } else {
-      initData.sort(function (a, b) {
-        return a.index - b.index;
-      });
-    }
-    return initData;
-  });
-  const [decreaseNumber, setDecreaseNumber] = useState(todoList.length);
+  const [todoList, setTodoList] = useState([]);
+  const listData = useRef();
+  listData.current = todoList;
 
   useEffect(() => {
-    setTodoList((prev) => {
-      return prev.sort(function (a, b) {
-        return a.index - b.index;
+    const getTodoList = async () => {
+      const data = await Todo.index();
+      let hasPinNumber = false;
+      let sortByPinNumberList = data.data.map((data) => {
+        if (data.pinNumber !== 0) {
+          hasPinNumber = true;
+        }
+        return data;
       });
-    });
+      if (hasPinNumber) {
+        sortByPinNumberList.sort(function (a, b) {
+          return b.pinNumber - a.pinNumber;
+        });
+      }
+      setTodoList(sortByPinNumberList);
+      setDecreaseNumber(sortByPinNumberList.length);
+    };
+    getTodoList();
+  }, []);
+
+  useEffect(() => {
+    setTodoList(
+      listData.current.sort(function (a, b) {
+        return new Date(a.timestamp) - new Date(b.timestamp);
+      })
+    );
   }, [decreaseNumber]);
 
   const handleChange = (e) => {
     let data = {
-      id: uuidv4(),
       content: e.target.value,
-      index: +todoList.length + 1,
       pinNumber: 0,
       todoStatus: 1,
       isChecked: false,
@@ -49,64 +57,60 @@ function TodoList() {
     }
   };
 
-  const handleAdd = () => {
-    setTodoList((prev) => {
-      const newTodoList = [...prev, todoItem];
-      localStorage.setItem("todoList", JSON.stringify(newTodoList));
-      return newTodoList;
-    });
+  const handleAdd = async () => {
+    const addData = await Todo.create(todoItem);
     setTodoItem({});
+    setTodoList([...todoList, addData.data]);
   };
 
-  const handleCheck = useCallback((id) => {
-    setTodoList((prev) => {
-      const newTodoList = prev.map((data) => {
-        if (data.id === id) {
-          return {
-            ...data,
-            isChecked: !data.isChecked,
-          };
-        }
-        return data;
-      });
-      localStorage.setItem("todoList", JSON.stringify(newTodoList));
-      return newTodoList;
+  const handleCheck = useCallback(async (id) => {
+    const newList = await listData.current.map(async (data) => {
+      if (data.id === id) {
+        const checkData = await Todo.check(data);
+        return {
+          ...data,
+          isChecked: checkData.data.isChecked,
+        };
+      }
+      return data;
     });
+    setTodoList(await Promise.all(newList));
   }, []);
 
-  const handleRemove = useCallback((id) => {
-    setTodoList((prev) => {
-      const newTodoList = prev.filter((todo) => todo.id !== id);
-      localStorage.setItem("todoList", JSON.stringify(newTodoList));
-      return newTodoList;
-    });
+  const handleRemove = useCallback(async (id) => {
+    const data = listData.current.find((data) => data.id === id);
+    const removed = await Todo.deleteTodo(data);
+    if (removed.data) {
+      setTodoList((prev) => {
+        const newTodoList = prev.filter((todo) => todo.id !== id);
+        return newTodoList;
+      });
+    }
   }, []);
 
-  const handleDone = useCallback((id) => {
-    setTodoList((prev) => {
-      const newTodoList = prev.map((data) => {
-        if (data.id === id) {
-          return {
-            ...data,
-            todoStatus: 2,
-          };
-        }
-        return data;
-      });
-      localStorage.setItem("todoList", JSON.stringify(newTodoList));
-      return newTodoList;
+  const handleDone = useCallback(async (id) => {
+    const newList = await listData.current.map(async (data) => {
+      if (data.id === id) {
+        const checkData = await Todo.done(data);
+        return {
+          ...data,
+          todoStatus: checkData.data.todoStatus,
+        };
+      }
+      return data;
     });
+    setTodoList(await Promise.all(newList));
   }, []);
 
   const handlePin = useCallback(
-    (id) => {
+    async (id) => {
       setTodoList((prev) => {
         const itemPinCounts =
           prev.filter((data) => data.pinNumber !== 0).length || 0;
         let newTodoList = prev.map((data) => {
           if (data.id === id) {
             const isNotPinned = !data.pinNumber ? true : false;
-            setDecreaseNumber((prev) => prev && prev.length - itemPinCounts);
+            setDecreaseNumber((prev) => prev || prev.length - itemPinCounts);
             if (isNotPinned) {
               if (data.pinNumber === 0) {
                 data.pinNumber = decreaseNumber;
@@ -127,12 +131,14 @@ function TodoList() {
           }
           return data;
         });
-        localStorage.setItem("todoList", JSON.stringify(newTodoList));
+
         newTodoList.sort(function (a, b) {
           return b.pinNumber - a.pinNumber;
         });
         return newTodoList;
       });
+      const data = listData.current.find((data) => data.id === id);
+      await Todo.pin(data);
     },
     [decreaseNumber]
   );

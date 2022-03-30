@@ -4,6 +4,7 @@ import { List, FormControl } from "@mui/material/";
 import TodoInput from "../../components/Todo/TodoInput/TodoInput";
 import TodoItem from "../../components/Todo/TodoItem/TodoItem";
 import db from "../../firebase-config";
+
 import {
   collection,
   query,
@@ -18,13 +19,11 @@ import {
 
 function TodoList() {
   const [decreaseNumber, setDecreaseNumber] = useState(0);
-  const [sortByIndex, setSortByIndex] = useState(false);
   const [todoItem, setTodoItem] = useState({});
   const [todoList, setTodoList] = useState([]);
   const listData = useRef();
   listData.current = todoList;
 
-  console.log("cha render");
   useEffect(() => {
     const todoListRef = collection(db, "todos");
     const listIncreaseQuery = query(todoListRef, orderBy("timestamp", "asc"));
@@ -54,10 +53,10 @@ function TodoList() {
   useEffect(() => {
     setTodoList((prev) => {
       return prev.sort(function (a, b) {
-        return a.index - b.index;
+        return a.timestamp - b.timestamp;
       });
     });
-  }, [sortByIndex]);
+  }, [decreaseNumber]);
 
   const handleChange = (e) => {
     let data = {
@@ -160,11 +159,9 @@ function TodoList() {
                   setDecreaseNumber(decreaseNumber - 1);
                 }
               }
-              setSortByIndex(!sortByIndex);
             } else {
               data.pinNumber = 0;
               setDecreaseNumber(decreaseNumber + 1);
-              setSortByIndex(!sortByIndex);
             }
             return {
               ...data,
@@ -178,6 +175,7 @@ function TodoList() {
         });
         return newTodoList;
       });
+
       const docRef = doc(db, "todos", id);
       const todoList = listData.current;
       const pinNumber = todoList.find(
@@ -186,7 +184,7 @@ function TodoList() {
       const payload = { pinNumber: pinNumber };
       await updateDoc(docRef, payload);
     },
-    [decreaseNumber, sortByIndex]
+    [decreaseNumber]
   );
 
   return (
