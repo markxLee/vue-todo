@@ -1,7 +1,17 @@
+import React, { useState } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { Button, ButtonGroup } from "@mui/material/";
 
+import Login from "./page/auth/Login";
+
 function App() {
+  const [token, setToken] = useState("");
+
+  console.log(token);
+  if (!token) {
+    return <Login setToken={setToken} />;
+  }
+
   return (
     <div className="App">
       <h1>TODO LIST</h1>
