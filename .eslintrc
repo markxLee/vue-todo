@@ -6,6 +6,7 @@
 		"plugin:react/recommended",
 		"plugin:react-hooks/recommended",
 		"plugin:import/recommended",
+		"plugin:react/jsx-runtime",
 		"plugin:import/typescript",
 		"prettier"
 	],
@@ -36,6 +37,16 @@
 				"html": true
 			}
 		]
+		// "sort-imports": [
+		// 	"error",
+		// 	{
+		// 		"ignoreCase": false,
+		// 		"ignoreDeclarationSort": false,
+		// 		"ignoreMemberSort": false,
+		// 		"memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
+		// 		"allowSeparatedGroups": false
+		// 	}
+		// ]
 	},
 	"ignorePatterns": ["src/**/*.test.ts", "src/frontend/generated/*"]
 }

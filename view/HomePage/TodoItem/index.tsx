@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import GradeIcon from '@mui/icons-material/Grade';
+
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import GradeIcon from '@mui/icons-material/Grade';
 import LabelImportantIcon from '@mui/icons-material/LabelImportant';
+
 import MuiTooltip from '@components/MuiTooltip';
 
 interface TodoItemProps {

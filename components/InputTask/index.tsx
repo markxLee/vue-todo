@@ -1,7 +1,8 @@
 import React, { ChangeEvent, startTransition, useState } from 'react';
-import Input from '@mui/material/Input';
-import { InputAdornment } from '@mui/material';
+
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { InputAdornment } from '@mui/material';
+import Input from '@mui/material/Input';
 
 import ButtonIcon from '@components/ButtonIcon';
 
@@ -12,11 +13,18 @@ interface InputTaskProps {
 const InputTask: React.FunctionComponent<InputTaskProps> = ({ onCreate }) => {
 	const [value, setValue] = useState('');
 
-	const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
+
 		startTransition(() => {
 			setValue(value);
 		});
+	};
+
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.code === 'Enter') {
+			callbackCreate();
+		}
 	};
 
 	const callbackCreate = () => {
@@ -30,6 +38,7 @@ const InputTask: React.FunctionComponent<InputTaskProps> = ({ onCreate }) => {
 		<Input
 			value={value}
 			onChange={handleChange}
+			onKeyDown={handleKeyDown}
 			size="medium"
 			fullWidth
 			disableUnderline
