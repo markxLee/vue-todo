@@ -5,7 +5,6 @@ import {
 	TODO_PIN_ITEMS_KEY,
 } from '@common/constant/localStorageKey';
 import { getLocalStorage } from '@common/functions/getLocalStorage';
-import useFirstMount from '@common/hooks/useFirstMount';
 import { flushSync } from 'react-dom';
 
 import InputTask from '@components/InputTask';
@@ -18,17 +17,10 @@ const HomePage = () => {
 	const [pinItems, setPinItems] = useState<IDoItem[]>([]);
 	const listItemsRef = useRef<HTMLDivElement>(null);
 
-	const { isFirstMount } = useFirstMount();
-
 	useEffect(() => {
-		if (!isFirstMount) {
-			localStorage.setItem(TODO_ITEMS_KEY, JSON.stringify(allItems));
-			localStorage.setItem(TODO_PIN_ITEMS_KEY, JSON.stringify(pinItems));
-		} else {
-			setAllItems(getLocalStorage(TODO_ITEMS_KEY) || []);
-			setPinItems(getLocalStorage(TODO_PIN_ITEMS_KEY) || []);
-		}
-	}, [allItems, pinItems]);
+		setAllItems(getLocalStorage(TODO_ITEMS_KEY) || []);
+		setPinItems(getLocalStorage(TODO_PIN_ITEMS_KEY) || []);
+	}, []);
 
 	const scrollBottomList = () => {
 		const listItemsElement = listItemsRef.current!;
@@ -59,14 +51,18 @@ const HomePage = () => {
 				item.id === selectItem.id ? { ...selectItem, pin: false } : item,
 			);
 		}
+
 		setAllItems(newItems);
 		setPinItems(newPinItems);
+		localStorage.setItem(TODO_ITEMS_KEY, JSON.stringify(allItems));
+		localStorage.setItem(TODO_PIN_ITEMS_KEY, JSON.stringify(pinItems));
 	};
 
 	const handleItemDone = (selectIndex: number) => {
 		const newItems = [...allItems];
 		newItems[selectIndex] = { ...newItems[selectIndex], done: true };
 		setAllItems(newItems);
+		localStorage.setItem(TODO_ITEMS_KEY, JSON.stringify(allItems));
 	};
 
 	return (

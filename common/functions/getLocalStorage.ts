@@ -1,6 +1,6 @@
 export const getLocalStorage = (key: string) => {
 	const value =
-		typeof localStorage === 'object'
+		typeof window !== 'undefined'
 			? JSON.parse(localStorage.getItem(key)!)
 			: null;
 	return value;
