@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Checkbox } from '@mui/material';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import { Checkbox } from '@mui/material';
 
 interface ICheckboxMuiProps {
 	value: boolean;

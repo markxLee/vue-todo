@@ -4,7 +4,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { InputAdornment } from '@mui/material';
 import Input from '@mui/material/Input';
 
-import ButtonIcon from '@components/ButtonIcon';
+import ButtonIcon from 'components/ButtonIcon';
 
 interface InputTaskProps {
 	onCreate: (value: string) => void;

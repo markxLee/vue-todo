@@ -1,9 +1,9 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 
-import theme from '@common/muiTheme';
 import { ThemeProvider } from '@mui/material';
-import '@styles/globals.css';
+import theme from 'common/muiTheme';
+import 'styles/globals.css';
 
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/700.css';

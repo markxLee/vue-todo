@@ -1,26 +1,50 @@
-import React, { useEffect, useRef, useState } from 'react';
-
-import {
-	TODO_ITEMS_KEY,
-	TODO_PIN_ITEMS_KEY,
-} from '@common/constant/localStorageKey';
-import { getLocalStorage } from '@common/functions/getLocalStorage';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 
-import InputTask from '@components/InputTask';
+import { TODO_ITEMS_KEY } from 'common/constant/localStorageKey';
+import { getLocalStorage } from 'common/functions/getLocalStorage';
+import useFirstMount from 'common/hooks/useFirstMount';
+
+import InputTask from 'components/InputTask';
 
 import TodoItem from './TodoItem';
 import { IDoItem } from './types';
 
 const HomePage = () => {
 	const [allItems, setAllItems] = useState<IDoItem[]>([]);
-	const [pinItems, setPinItems] = useState<IDoItem[]>([]);
+
+	const { isFirstMount } = useFirstMount();
 	const listItemsRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		setAllItems(getLocalStorage(TODO_ITEMS_KEY) || []);
-		setPinItems(getLocalStorage(TODO_PIN_ITEMS_KEY) || []);
 	}, []);
+
+	useEffect(() => {
+		if (isFirstMount) return;
+
+		localStorage?.setItem(TODO_ITEMS_KEY, JSON.stringify(allItems));
+	}, [allItems]);
+
+	const allItemMemo = useMemo(() => {
+		const pinItems: IDoItem[] = [];
+		const notPinItems: IDoItem[] = [];
+
+		allItems.forEach((item) => {
+			if (item.pin) {
+				pinItems.push(item);
+			} else {
+				notPinItems.push(item);
+			}
+		});
+
+		pinItems.sort((a, b) => {
+			if (!a.pinAt || !b.pinAt) return 1;
+			return a.pinAt?.getTime?.() - b.pinAt?.getTime?.();
+		});
+
+		return [notPinItems, pinItems];
+	}, [allItems]);
 
 	const scrollBottomList = () => {
 		const listItemsElement = listItemsRef.current!;
@@ -38,32 +62,53 @@ const HomePage = () => {
 		scrollBottomList();
 	};
 
-	const handleItemPin = (selectIndex: number, value: boolean) => {
-		let newItems = [...allItems];
-		const newPinItems = [...pinItems];
+	const handlePin = (id: string, value: boolean) => {
+		const newItems = allItems.map((item) => {
+			if (item.id !== id) return item;
+			return {
+				...item,
+				pin: value,
+				pinAt: new Date(),
+			};
+		});
+		setAllItems(newItems);
+	};
 
-		if (value) {
-			newItems[selectIndex] = { ...newItems[selectIndex], pin: value };
-			newPinItems.push(newItems[selectIndex]);
-		} else {
-			const [selectItem] = newPinItems.splice(selectIndex, 1);
-			newItems = allItems.map((item: IDoItem) =>
-				item.id === selectItem.id ? { ...selectItem, pin: false } : item,
+	const handleDone = (id: string) => {
+		const newItems = allItems.map((item) => {
+			if (item.id !== id) return item;
+			return {
+				...item,
+				done: true,
+			};
+		});
+		setAllItems(newItems);
+	};
+
+	const handleDelete = (id: string) => {
+		const newItems = [...allItems].filter((item) => item.id !== id);
+		setAllItems(newItems);
+	};
+
+	const renderItems = (items: IDoItem[]) => {
+		return items?.map((item: IDoItem) => {
+			return (
+				<TodoItem
+					key={item.id}
+					id={item.id}
+					isDone={!!item.done}
+					isPined={!!item.pin}
+					content={item.content}
+					onChangePin={handlePin}
+					onChangeDone={handleDone}
+					onChangeDelete={handleDelete}
+				/>
 			);
-		}
-
-		setAllItems(newItems);
-		setPinItems(newPinItems);
-		localStorage.setItem(TODO_ITEMS_KEY, JSON.stringify(allItems));
-		localStorage.setItem(TODO_PIN_ITEMS_KEY, JSON.stringify(pinItems));
+		});
 	};
 
-	const handleItemDone = (selectIndex: number) => {
-		const newItems = [...allItems];
-		newItems[selectIndex] = { ...newItems[selectIndex], done: true };
-		setAllItems(newItems);
-		localStorage.setItem(TODO_ITEMS_KEY, JSON.stringify(allItems));
-	};
+	const [notPinItems, pinItems] = allItemMemo;
+	console.log(pinItems);
 
 	return (
 		<div className="w-screen h-screen bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center p-4">
@@ -74,35 +119,8 @@ const HomePage = () => {
 					</div>
 
 					<div className="flex-auto scroller space-y-1" ref={listItemsRef}>
-						{pinItems?.map((item: IDoItem, index: number) => {
-							return (
-								<TodoItem
-									key={item.id}
-									id={item.id}
-									index={index}
-									isDone={!!item.done}
-									isPined={!!item.pin}
-									content={item.content}
-									onChangePin={handleItemPin}
-									onChangeDone={handleItemDone}
-								/>
-							);
-						})}
-						{allItems?.map((item: IDoItem, index: number) => {
-							if (item.pin) return null;
-							return (
-								<TodoItem
-									key={item.id}
-									id={item.id}
-									index={index}
-									isDone={!!item.done}
-									isPined={!!item.pin}
-									content={item.content}
-									onChangePin={handleItemPin}
-									onChangeDone={handleItemDone}
-								/>
-							);
-						})}
+						{renderItems(pinItems)}
+						{renderItems(notPinItems)}
 					</div>
 				</div>
 			</div>

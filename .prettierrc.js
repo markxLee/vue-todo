@@ -8,11 +8,11 @@ module.exports = {
 	bracketSpacing: true,
 	jsxBracketSameLine: false,
 	importOrder: [
-		'^(react/(.*)$)|^(react$)', // Imports by "react"
+		'^(react*)', // Imports by "react"
 		'^(next/(.*)$)|^(next$)', // Imports by "next"
 		'<THIRD_PARTY_MODULES>',
 		'next-seo.config',
-		'^@components/(.*)$',
+		'^components/(.*)$',
 		'^@fontsource/(.*)$',
 		'^[./]', // Other imports
 	],
